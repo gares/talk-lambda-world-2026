@@ -25,6 +25,8 @@ ximage: logo.png
 transition: fade
 level: 2
 hideInToc: true
+# Elpi is a logic programming language descendant of λProlog well suited to manipulate syntax trees with binders. Elpi comes as an interpreter designed to be embedded into larger OCaml applications as an extension language.
+# In this talk I give a gentle introduction to logic programming and how its rule-based nature makes it easy to manipulate syntax trees that contain binders or that are incomplete. I then focus on how Elpi can be used to extend an OCaml application via its foreign function interface.
 ---
 
 # Elpi: rule-based extension language
