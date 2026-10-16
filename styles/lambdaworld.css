@@ -1,6 +1,8 @@
-/* Lambda.World 2026 look: black grid, yellow accent, Plex/Roboto Mono.
+/* Lambda.World 2026 look: grid, yellow accent, Plex/Roboto Mono.
    Applied to every slide via `defaults: { class: lw }` in the headmatter;
-   dedicated layouts: lw-cover, lw-default, lw-section, lw-end. */
+   dedicated layouts: lw-cover, lw-default, lw-section, lw-end.
+   Dark is the main look; light mode (html:not(.dark)) uses the light
+   backgrounds of the original template. */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=Roboto+Mono:wght@500;600&family=Russo+One&display=swap');
 
 :root {
@@ -14,43 +16,109 @@
   --lw-display: 'Russo One', 'Impact', sans-serif;
 }
 
+/* ---- color tokens ------------------------------------------------------ */
+
 .slidev-layout.lw {
-  position: relative;
-  background: #000 url('/lw/bg-grid.png') center / cover no-repeat;
-  color: #fff;
-  font-family: 'IBM Plex Sans', sans-serif;
-  padding: 2rem 3rem;
+  --lw-bg: #000;
+  --lw-fg: #fff;
+  --lw-fg-muted: #ddd;
+  --lw-h1: var(--lw-yellow);
+  --lw-h2: var(--lw-orange);
+  --lw-h3: #fff;
+  --lw-title-stroke: transparent;
+  --lw-link: var(--lw-yellow);
+  --lw-rule: #444;
+  --lw-hover: #1a1a1a;
+  --lw-code-border: #333;
+  --lw-credit-fg: #ccc;
+  --lw-credit-bg: rgba(0,0,0,.75);
+  --lw-veil: rgba(0,0,0,.82);        /* darkens busy textures */
+  --lw-soft-veil: transparent;       /* tones down strokes/noise */
+  --lw-grid-veil: transparent;       /* tones down the grid lines */
+  --lw-logo-filter: none;            /* logos are white */
+  --lw-img-grid: url('/lw/bg-grid.png');
+  --lw-img-texture: url('/lw/bg-texture.png');
+  --lw-img-strokes: url('/lw/bg-strokes.png');
+  --lw-img-strokes-soft: url('/lw/bg-strokes-soft.png');
+  --lw-img-noise: url('/lw/bg-noise.png');
+  --lw-img-diagonal: url('/lw/bg-diagonal.png');
+  --lw-bg-img: var(--lw-img-grid);
+
   --slidev-code-background: #141414;
   --slidev-theme-primary: var(--lw-yellow);
   --highlight-one: var(--lw-yellow);
   --highlight-two: var(--lw-orange);
   /* neversink color variables */
   --neversink-main-font: 'IBM Plex Sans', sans-serif;
-  --neversink-bg-color: #000;
-  --neversink-text-color: #fff;
+  --neversink-bg-color: var(--lw-bg);
+  --neversink-text-color: var(--lw-fg);
   --neversink-bg-code-color: #262626;
   --neversink-fg-code-color: var(--lw-lime);
   --neversink-border-color: var(--lw-yellow);
   --neversink-highlight-color: var(--lw-yellow);
 }
+
+html:not(.dark) .slidev-layout.lw {
+  --lw-bg: #fff;
+  --lw-fg: #111;
+  --lw-fg-muted: #333;
+  --lw-h2: #d97800;
+  --lw-h3: #111;
+  --lw-title-stroke: #000;           /* yellow titles get a black outline */
+  --lw-link: #b07a00;
+  --lw-rule: #ccc;
+  --lw-hover: #f2f2f2;
+  --lw-code-border: #ddd;
+  --lw-credit-fg: #333;
+  --lw-credit-bg: rgba(255,255,255,.85);
+  --lw-veil: rgba(255,255,255,.6);
+  --lw-soft-veil: rgba(255,255,255,.55);
+  --lw-grid-veil: rgba(255,255,255,.6);
+  --lw-logo-filter: invert(1);       /* white logos become black */
+  --lw-img-grid: url('/lw/bg-grid-light.png');
+  --lw-img-texture: url('/lw/bg-texture-light.png');
+  --lw-img-strokes: url('/lw/bg-strokes-light.png');
+  --lw-img-strokes-soft: url('/lw/bg-strokes-soft-light.png');
+  --lw-img-noise: url('/lw/bg-noise-light.png');
+  --lw-img-diagonal: url('/lw/bg-diagonal-light.png');
+
+  --slidev-code-background: #f6f6f6;
+  --neversink-bg-code-color: #fff3c4;
+  --neversink-fg-code-color: #8a5a00;
+}
+
+/* ---- base -------------------------------------------------------------- */
+
+.slidev-layout.lw {
+  position: relative;
+  background: var(--lw-bg) center / cover no-repeat;
+  background-image: linear-gradient(var(--lw-grid-veil), var(--lw-grid-veil)), var(--lw-bg-img);
+  color: var(--lw-fg);
+  font-family: 'IBM Plex Sans', sans-serif;
+  padding: 2rem 3rem;
+}
 .lw h1, .lw h2, .lw h3 {
   font-family: var(--lw-display);
   font-style: italic;
   text-transform: uppercase;
-  color: var(--lw-yellow);
   letter-spacing: .02em;
 }
-.lw h1 { font-size: 1.8rem; line-height: 1.15; margin-bottom: .5em; }
-.lw h2 { font-size: 1.5rem; color: var(--lw-orange); }
-.lw h3, .lw h4 { font-size: 1.15rem; color: #fff; }
-.lw a { color: var(--lw-yellow); border-bottom-color: var(--lw-yellow); }
+.lw h1 {
+  font-size: 1.8rem; line-height: 1.15; margin-bottom: .5em;
+  color: var(--lw-h1);
+  -webkit-text-stroke: 1px var(--lw-title-stroke);
+  paint-order: stroke fill;
+}
+.lw h2 { font-size: 1.5rem; color: var(--lw-h2); }
+.lw h3, .lw h4 { font-size: 1.15rem; color: var(--lw-h3); }
+.lw a { color: var(--lw-link); border-bottom-color: var(--lw-link); }
 .lw li::marker { color: var(--lw-yellow); }
 .lw code, .lw pre { font-family: 'Roboto Mono', monospace; }
-.lw .slidev-code { background: var(--slidev-code-background) !important; border: 1px solid #333; }
-.lw blockquote { border-left: 4px solid var(--lw-yellow); color: #ddd; }
-.lw th { color: var(--lw-yellow); }
-.lw tr { border-color: #444; }
-.lw tr:hover { background: #1a1a1a; }
+.lw .slidev-code { background: var(--slidev-code-background) !important; border: 1px solid var(--lw-code-border); }
+.lw blockquote { border-left: 4px solid var(--lw-yellow); color: var(--lw-fg-muted); }
+.lw th { color: var(--lw-h2); }
+.lw tr { border-color: var(--lw-rule); }
+.lw tr:hover { background: var(--lw-hover); }
 
 /* inline highlights (`[text]{style="background-color: var(--highlight-one)"}`) */
 .lw [style*="--highlight"] { color: #000; padding: 0 .3em; border-radius: 3px; }
@@ -63,46 +131,56 @@
 
 /* pictures drawn for a white background get a white card */
 .lw img.on-white, .lw .on-white img { background: #fff; padding: .5rem; border-radius: 6px; }
+html:not(.dark) .lw img.on-white, html:not(.dark) .lw .on-white img { box-shadow: 0 0 0 1px #ddd; }
 
-/* black behind layouts that only partly carry .lw (e.g. image-right) */
+/* behind layouts that only partly carry .lw (e.g. image-right) */
 .slidev-page { background-color: #000; }
+html:not(.dark) .slidev-page { background-color: #fff; }
 
 /* avatar rows sit below the logo */
 .lw .authors { top: 2.8rem; }
 
 /* Lambda.World logo, placed by global-top.vue */
 .lw-logo { position: absolute; top: 1.1rem; right: 1.5rem; height: 1.3rem; width: auto; z-index: 10; }
+html:not(.dark) .lw-logo { filter: invert(1); }
 
-/* section: diagonal texture, big yellow title */
-.slidev-layout.lw-section, .slidev-layout.lw-end {
-  background-image: linear-gradient(rgba(0,0,0,.82), rgba(0,0,0,.82)), url('/lw/bg-texture.png');
+/* ---- backgrounds: `class: lw bg-strokes` (layoutClass for two-cols-header) */
+
+.slidev-layout.lw-section, .slidev-layout.lw-end,
+.slidev-layout.lw.bg-texture {
+  background-image: linear-gradient(var(--lw-veil), var(--lw-veil)), var(--lw-img-texture);
 }
-.lw-section { display: flex; flex-direction: column; justify-content: center; }
+.slidev-layout.lw.bg-grid         { background-image: linear-gradient(var(--lw-grid-veil), var(--lw-grid-veil)), var(--lw-img-grid); }
+.slidev-layout.lw.bg-strokes      { background-image: linear-gradient(var(--lw-soft-veil), var(--lw-soft-veil)), var(--lw-img-strokes); }
+.slidev-layout.lw.bg-strokes-soft { background-image: linear-gradient(var(--lw-soft-veil), var(--lw-soft-veil)), var(--lw-img-strokes-soft); }
+.slidev-layout.lw.bg-noise        { background-image: linear-gradient(var(--lw-soft-veil), var(--lw-soft-veil)), var(--lw-img-noise); }
+.slidev-layout.lw.bg-diagonal     { background-image: var(--lw-img-diagonal); }
+.slidev-layout.lw.bg-plain        { background-image: none; }
 
-/* background picker, per slide: `class: lw bg-strokes` (layoutClass for two-cols-header) */
-.slidev-layout.lw.bg-grid        { background-image: url('/lw/bg-grid.png'); }
-.slidev-layout.lw.bg-texture     { background-image: linear-gradient(rgba(0,0,0,.82), rgba(0,0,0,.82)), url('/lw/bg-texture.png'); }
-.slidev-layout.lw.bg-strokes     { background-image: url('/lw/bg-strokes.png'); }
-.slidev-layout.lw.bg-strokes-soft { background-image: url('/lw/bg-strokes-soft.png'); }
-.slidev-layout.lw.bg-noise       { background-image: url('/lw/bg-noise.png'); }
-.slidev-layout.lw.bg-diagonal    { background-image: url('/lw/bg-diagonal.png'); }
-.slidev-layout.lw.bg-plain       { background-image: none; }
-.lw-section h1 { font-size: 3.4rem; line-height: 1.1; }
+/* ---- layouts ----------------------------------------------------------- */
+
+/* section: big yellow title */
+.lw-section { display: flex; flex-direction: column; justify-content: center; }
+.lw-section h1 { font-size: 3.4rem; line-height: 1.1; -webkit-text-stroke-width: 2px; }
 
 /* cover */
 .lw-cover { display: flex; flex-direction: column; justify-content: center; }
-.lw-cover h1, .lw-cover h2 { font-size: 3rem; line-height: 1.1; margin: 0 0 .4em; color: var(--lw-yellow); }
-.lw-cover .lw-logos3 { position: absolute; left: 3.5rem; bottom: 2.5rem; height: 3.2rem; width: auto; }
+.lw-cover h1, .lw-cover h2 {
+  font-size: 3rem; line-height: 1.1; margin: 0 0 .4em; color: var(--lw-h1);
+  -webkit-text-stroke: 2px var(--lw-title-stroke); paint-order: stroke fill;
+}
+.lw-cover .lw-logos3 { position: absolute; left: 3.5rem; bottom: 2.5rem; height: 3.2rem; width: auto; filter: var(--lw-logo-filter); }
+.lw .lw-name { font-size: 1.5em; font-weight: 600; color: var(--lw-fg); vertical-align: -0.15em; }
 
 /* end */
 .lw-end { text-align: center; }
 .lw-end-body { margin-top: 2rem; }
 .lw-end h1 { font-size: 3rem; }
-.lw .chip + a, .lw-end-body a { color: #fff; border: 0; }
+.lw .chip + a, .lw-end-body a { color: var(--lw-fg); border: 0; }
 
 /* image credits, bottom-left: <div class="lw-credit">...</div> */
-.lw .lw-credit { position: absolute; left: 3rem; bottom: .8rem; font-size: .55rem; color: #ccc; background: rgba(0,0,0,.75); padding: .1rem .4rem; border-radius: 3px; }
-.lw .lw-credit a { color: #aaa; border: 0; }
+.lw .lw-credit { position: absolute; left: 3rem; bottom: .8rem; font-size: .55rem; color: var(--lw-credit-fg); background: var(--lw-credit-bg); padding: .1rem .4rem; border-radius: 3px; }
+.lw .lw-credit a { color: var(--lw-credit-fg); border: 0; }
 
 /* summary / agenda: big yellow numbers, plain markdown on a slide with
    `class: lw lw-summary`:
@@ -110,8 +188,18 @@
         - sub item
      2. Part two                                                       */
 .lw.lw-summary ol { list-style: none; counter-reset: lw-sum; margin: 3.5rem 0 0 2rem; padding: 0; }
-.lw.lw-summary ol > li { counter-increment: lw-sum; position: relative; padding-left: 7.5rem; margin-bottom: 2.5rem; font-size: 2rem; font-weight: 600; line-height: 1.2; color: #fff; }
-.lw.lw-summary ol > li::before { content: counter(lw-sum, decimal-leading-zero); position: absolute; left: 0; top: -.15em; font-family: var(--lw-display); font-style: italic; font-size: 3.5rem; line-height: 1; color: var(--lw-yellow); }
+.lw.lw-summary ol > li { counter-increment: lw-sum; position: relative; padding-left: 7.5rem; margin-bottom: 2.5rem; font-size: 2rem; font-weight: 600; line-height: 1.2; color: var(--lw-fg); }
+.lw.lw-summary ol > li::before {
+  content: counter(lw-sum, decimal-leading-zero); position: absolute; left: 0; top: -.15em;
+  font-family: var(--lw-display); font-style: italic; font-size: 3.5rem; line-height: 1; color: var(--lw-yellow);
+  -webkit-text-stroke: 2px var(--lw-title-stroke); paint-order: stroke fill;
+}
 .lw.lw-summary ol > li::marker { content: none; }
-.lw.lw-summary ol ul { margin-top: .6rem; font-size: 1.3rem; font-weight: 400; color: #ddd; }
+.lw.lw-summary ol ul { margin-top: .6rem; font-size: 1.3rem; font-weight: 400; color: var(--lw-fg-muted); }
 .lw.lw-summary ol ul li { margin-bottom: .2em; line-height: 1.4; }
+
+/* runnable code with its output on the right: put `lw-run-side` on the
+   slide (`class: lw lw-run-side`) or on a <div> around the code block */
+.lw-run-side .slidev-monaco-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: stretch; }
+.lw-run-side .slidev-monaco-container > div:nth-child(2) { border-top: 0; border-left: 1px solid var(--lw-code-border); border-radius: 0; }
+.lw-run-side .slidev-runner-output { font-size: .85rem; line-height: 1.25rem; }

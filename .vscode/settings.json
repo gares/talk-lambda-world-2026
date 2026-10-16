@@ -1,0 +1,19 @@
+{
+  // Don't spend inotify watches (and search time) on dependencies and on
+  // what Slidev generates: `make html` output, `make slides.pdf` temporaries,
+  // and the js_of_ocaml build of Elpi.
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/html/**": true,
+    "**/slides.png/**": true,
+    "**/dist/**": true,
+    "**/.slidev/**": true,
+    "setup/elpi.js": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "html/**": true,
+    "slides.png/**": true,
+    "setup/elpi.js": true
+  }
+}

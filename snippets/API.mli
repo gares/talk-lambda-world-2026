@@ -1,0 +1,1663 @@
+(* elpi: embedded lambda prolog interpreter                                  *)
+(* license: GNU Lesser General Public License Version 2.1 or later           *)
+(* ------------------------------------------------------------------------- *)
+
+(** This module is the API for clients of the Elpi library. *)
+
+(* ************************************************************************* *)
+(* *************************** Basic API *********************************** *)
+(* ************************************************************************* *)
+
+(** These APIs are sufficient to parse programs and queries from text, run
+    the interpreter and finally print the result *)
+
+module Ast : sig
+  type program
+  type query
+
+  module Loc : sig
+    type t = {
+      client_payload : Obj.t option;
+      source_name : string;
+      source_start: int;
+      source_stop: int;
+      line: int;
+      line_starts_at: int;
+    }
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+    val equal : t -> t -> bool
+    val compare : t -> t -> int
+
+    val initial : ?client_payload:Obj.t -> string -> t
+  end
+
+  module Name : sig
+    type t
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+
+    module Set : sig
+      include Set.S with type elt = t
+      val show : t -> string
+      val pp : Format.formatter -> t -> unit
+     end
+     module Map : sig
+      include Map.S with type key = t
+      val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
+      val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+     end
+
+   val from_string : string -> t
+
+   type constant = int
+   val is_global : t -> int -> bool
+  end 
+  module Scope : sig
+    type t
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+    type language
+    val pp_language : Format.formatter -> language -> unit
+    val show_language : language -> string
+
+    module Map : Map.S with type key = Name.t * language
+
+  end
+  module Opaque : sig
+    type t
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+  end
+  
+  module Type : sig
+    type t_ =
+      | Any
+      | Con of Name.t
+      | App of Name.t * t * t list
+      | Arr of t * t
+    and t = { it : t_; loc : Loc.t }
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+  end
+
+  module Term : sig
+    type impl_kind = L2R | L2RBang | R2L
+    type t_ =
+      | Impl of impl_kind * Loc.t * t * t
+      | Const of Scope.t * Name.t
+      | Discard
+      | Var of Name.t * Loc.t * t list (** unification variable *)
+      | App of Scope.t * Name.t * Loc.t * t * t list
+      | Lam of (Name.t * Loc.t * Scope.language) option * Type.t option * t
+      | Opaque of Opaque.t
+      | Cast of t * Type.t
+    and t = { it : t_; loc : Loc.t; }
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+
+    (** See {!module:RawData.Constants} to allocate global constants *)
+    type constant = Name.constant
+    val mkGlobal : loc:Loc.t -> constant -> t
+    val mkBound : loc:Loc.t -> language:Scope.language -> Name.t -> t
+    val mkAppGlobal : loc:Loc.t -> hdloc:Loc.t -> constant -> t -> t list -> t
+    val mkAppBound : loc:Loc.t -> hdloc:Loc.t -> language:Scope.language -> Name.t -> t -> t list -> t
+    val mkVar : loc:Loc.t -> hdloc:Loc.t -> Name.t -> t list -> t
+    val mkOpaque : loc:Loc.t -> Opaque.t -> t
+    val mkCast : loc:Loc.t -> t -> Type.t -> t
+    val mkLam : loc:Loc.t -> (Name.t * Loc.t * Scope.language) option -> ?ty:Type.t -> t -> t
+    val mkDiscard : loc:Loc.t -> t
+
+    (** Handy constructors to build goals *)
+    val mkImplication : loc:Loc.t -> hdloc:Loc.t -> t -> t -> t
+    val mkPi : loc:Loc.t -> hdloc:Loc.t -> Name.t -> nloc:Loc.t -> ?ty:Type.t -> t -> t
+    val mkConj : loc:Loc.t -> hdloc:Loc.t -> t list -> t
+    val mkEq : loc:Loc.t -> hdloc:Loc.t -> t -> t -> t
+    val mkNil : loc:Loc.t -> t
+    (** if omitted, the loc is the merge of the hd and tl locs, as if
+        one wrote (hd :: tl), but not as if one wrote [hd|tl] *)
+    val mkCons : ?loc:Loc.t -> hdloc:Loc.t -> t -> t -> t
+
+    val list_to_lp_list : loc:Loc.t -> t list -> t
+    val ne_list_to_lp_list : t list -> t
+    val lp_list_to_list : t -> t list
+
+    (** See Coq-Elpi's lp:(F x) construct *)
+    val apply_elpi_var_from_quotation : t -> t list -> t
+    val extend_spill_hyp_from_quotation : t -> t list -> t
+    val is_spill_from_quotation : t -> bool
+  
+  end
+
+
+end
+
+module Setup : sig
+
+  (* State extensions see {!module:State} *)
+  type state_descriptor
+
+  (* Quotation extensions see {!module:Quotations} *)
+  type quotations_descriptor
+
+  (* HOAS encoding extensions see {!module:RawData} *)
+  type hoas_descriptor
+
+  (* Built-in predicates, see {!module:BuiltIn} *)
+  type builtins
+
+  (* Operations avaiable via calc (infix is), see {!module:Calc} *)
+  type calc_descriptor
+
+  (* Compilation flags, see {!module:Compile} *)
+  type flags
+  
+  (* Handle to an elpi instance *)
+  type elpi
+
+  module StrMap : sig
+    include Map.S with type key = string
+    val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
+    val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+  end
+ 
+  (** Initialize ELPI.
+
+      [init] must be called before invoking the parser.
+
+      @param flags for the compiler, see {!type:Compile.flags}
+      @param builtins the set of built-in predicates, eg {!val:Elpi.Builtin.std_builtins}
+      @param file_resolver maps a file name to an absolute path, if not specified the
+        options like [-I] or the env variable [TJPATH] serve as resolver. The
+        resolver returns the abslute file name
+        (possibly adjusting the unit extension). By default it fails.
+        See also {!val:Parse.std_resolver}.
+
+      @return a handle [elpi] to an elpi instance equipped with the given
+        [builtins] and where accumulate resolves files with the given
+        [file_resolver]. *)
+  val init :
+    ?versions:(int * int * int) StrMap.t ->
+    ?flags:flags ->
+    ?state:state_descriptor ->
+    ?quotations:quotations_descriptor ->
+    ?hoas:hoas_descriptor ->
+    ?calc:calc_descriptor ->
+    builtins:builtins list ->
+    ?file_resolver:(?cwd:string -> unit:string -> unit -> string) ->
+    unit ->
+    elpi
+
+  (** Usage string *)
+  val usage : string
+
+  (** Set tracing options.
+      [trace argv] can be called before {!module:Execute}.
+      returns options not known to the trace system.
+      *)
+  val trace : string list -> string list
+
+  (** Override default runtime error functions (they call exit) *)
+  type warning_id = LinearVariable | UndeclaredGlobal | FlexClause | ImplicationPrecedence | NestedAccumulate
+  val set_warn : (?loc:Ast.Loc.t -> id:warning_id -> string -> unit) -> unit
+  val set_error : (?loc:Ast.Loc.t -> string -> 'a) -> unit
+  val set_anomaly : (?loc:Ast.Loc.t -> string -> 'a) -> unit
+  val set_type_error : (?loc:Ast.Loc.t -> string -> 'a) -> unit
+  val set_std_formatter : Format.formatter -> unit
+  val set_err_formatter : Format.formatter -> unit
+
+end
+
+module Compile : sig
+
+  module StrSet : sig
+   include Set.S with type elt = string
+   val show : t -> string
+   val pp : Format.formatter -> t -> unit
+  end
+
+  type flags = {
+    (* variables used in conditional compilation, that is :if clauses *)
+    defined_variables : StrSet.t;
+    (* debug: print compilation units *)
+    print_units : bool;
+    (* keep track of the amount of time spent type checking, default false *)
+    time_typechecking : bool;
+    (* skip determinacy analysis *)
+    skip_det_checking: bool;
+    (* resilient passes stop after that many errors; 0, the default, means
+       that the first error is raised (CompileError, Parse.ParseError), so
+       that nothing is dropped silently by a client that does not look at the
+       list of errors *)
+    max_errors: int;
+  }
+  val default_flags : flags
+  val to_setup_flags : flags -> Setup.flags
+
+  type program
+  type query
+  type executable
+
+  (** The passes that compile user text ([program], [scope_ast], [unit],
+      [extend], [extend_signature]) return their result and the list of the
+      errors found, in order of occurrence. With [flags.max_errors] set to 0
+      (the default) the first error is raised as [CompileError] and the list
+      is empty. Otherwise a pass stops after [flags.max_errors] errors and
+      adds a final error saying that the rest was not checked. The queries and
+      the builtins always raise [CompileError]. *)
+  type error = {
+    component : string;     (** the pass that found the error, eg [Typechecker] *)
+    loc : Ast.Loc.t option;
+    message : string;       (** without the name of the component *)
+  }
+  val pp_error : Format.formatter -> error -> unit
+  (** [location:] then, on the next line, [Component: message] *)
+  val pp_error_message : Format.formatter -> error -> unit
+  (** [Component: message], for who shows the location separately *)
+  val show_error : error -> string
+
+  (** Raised by the queries and the builtins, and by the other passes when
+      [flags.max_errors] is 0 (the default): the first error *)
+  exception CompileError of error
+
+  (* basic API: Compile all program files in one go.
+
+     Note:
+     - programs are concatened and compiled together, as if their sources
+       were glued together
+     - unless explicitly delimited via `{` and `}`, shorten directives and
+       macros are globally visible
+     - the `accumulate` directive inserts `{` and `}` around the accumulated
+       code
+   *)
+  val program : ?flags:flags -> elpi:Setup.elpi -> Ast.program -> program * error list
+
+  (* separate compilation API: scoped_programs and units are marshalable and
+     closed w.r.t. the host application (eg quotations are desugared).
+
+     Note:
+     - macros and shorten directives part of a unit are not visible in other
+       units
+     - macros declared as part of the builtins given to Setup.init are
+       visible in all units
+     - types, type abbreviations and mode declarations from the  units are
+       merged at assembly time
+*)
+  type scoped_program
+  val scoped_program_name : scoped_program -> string
+  val scoped_program_digest : scoped_program -> Digest.t
+  val scoped_program_deps : scoped_program -> (string * Digest.t) list
+  val scope_ast : ?flags:flags -> elpi:Setup.elpi -> Ast.program -> scoped_program list * error list
+  val scope_builtins : ?flags:flags -> elpi:Setup.elpi -> Setup.builtins -> scoped_program
+  
+  type compilation_unit
+  val compilation_unit_name : compilation_unit -> string
+  val compilation_unit_digest : compilation_unit -> Digest.t
+  val compilation_unit_deps : compilation_unit -> (string * Digest.t) list
+  val pp_compilation_unit : Format.formatter -> compilation_unit -> unit
+  
+  type compilation_unit_signature
+  val compilation_unit_signature_name : compilation_unit_signature -> string
+  val compilation_unit_signature_digest : compilation_unit_signature -> Digest.t
+
+  val empty_base : elpi:Setup.elpi -> program
+  val unit : ?flags:flags -> elpi:Setup.elpi -> base:program -> scoped_program -> compilation_unit * error list
+  val extend : ?flags:flags -> base:program -> compilation_unit -> program * error list
+
+  (* only adds the types/modes from the compilation unit, not its code *)
+  val signature : compilation_unit -> compilation_unit_signature
+  val extend_signature : ?flags:flags -> base:program -> compilation_unit_signature -> program * error list
+
+  (** [map_compilation_unit f u] applies [f] to every opaque data (CData)
+      node in the unit *)
+  val map_compilation_unit : (Ast.Opaque.t -> Ast.Opaque.t) -> compilation_unit -> compilation_unit
+
+  (* then compile the query *)
+  val query : program -> Ast.query -> query
+  
+  (* finally obtain the executable *)
+  val optimize : query -> executable
+  
+  val total_type_checking_time : query -> float
+  val total_det_checking_time : query -> float
+
+  module IntervalTree : sig
+    type 'a t
+    val of_list : (Ast.Loc.t * 'a) list -> 'a t
+    val find : Ast.Loc.t -> 'a t -> (Ast.Loc.t * 'a) list
+    val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+  end
+
+  type type_
+  val pp_type_ : Format.formatter -> type_ -> unit
+
+  type info = { defined : Ast.Loc.t option; type_ : type_ option }
+  val pp_info : Format.formatter -> info -> unit
+
+  (** Hover information as an interval tree, cheaper than {!iter}.
+      [hover u] covers the rules of [u]: the type of each sub-expression and
+      the declaration of its head. [hover_types sp] covers the type
+      expressions of the declarations (pred, type, type abbreviations) of [sp]:
+      for each node, its location, a text (the kind of a type constructor, the
+      type itself for compound types), and the location of the declaration of
+      the type constructor when it is in [sp] *)
+  val hover : compilation_unit -> info IntervalTree.t
+  val hover_types : scoped_program -> (Ast.Loc.t * string * Ast.Loc.t option) list
+
+  type origin = User | Builtin | Core | Undeclared
+  type cls = Predicate | Function | Data
+  type kind =
+    | Constant of cls * origin  (* a symbol resolved to a declaration *)
+    | Bound                     (* occurrence of a variable bound by x\, pi x\, sigma x\ *)
+    | Binder                    (* the binding occurrence of such a variable *)
+    | Unification_variable      (* a variable of the rule *)
+    | Discard
+    | Literal of [ `Int | `Float | `String | `Other ]
+    | Keyword                   (* :- => , ; ! pi sigma *)
+    | Type_constructor | Type_abbreviation | Type_variable | Type_keyword
+  | Macro                     (* a use of a macro, @name *)
+
+  type node = {
+    loc : Ast.Loc.t;               (* of the name of the symbol *)
+    kind : kind;
+    name : string option;
+    defined : Ast.Loc.t option;    (* the declaration of a constant, the binder (with
+                                      pi/sigma, without the backslash) of a bound
+                                      variable, the head of the rule of a unification variable,
+                                      the declaration of a macro *)
+    declaration : bool;            (* the binding occurrence of a variable, the symbol that a rule defines (the head of its head) *)
+  }
+  val pp_node : Format.formatter -> node -> unit
+
+  (* [iter sp u f] calls [f] on the symbols of the unit [u]: of its rules,
+     CHR rules and macros, and of the type expressions of the declarations of
+     its scoped program [sp] *)
+  val iter : scoped_program -> compilation_unit -> (node -> unit) -> unit
+end
+
+module Parse : sig
+
+  (** The parser does not stop at the first syntax error: a declaration with a
+      syntax error is skipped up to the next dot and dropped, and its error is
+      returned. The errors are in order of occurrence, and [component] is
+      [Parser]. The parser stops after [flags.max_errors] errors, with a last
+      error that says so; if it is 0 (the default, also when [flags] is not
+      given) the first error is raised as [ParseError].
+      The text given to [program_from] must be complete
+      (e.g. [Lexing.from_string]). *)
+  type error = Compile.error = {
+    component : string;
+    loc : Ast.Loc.t option;
+    message : string;
+  }
+
+  (** [program file] parses a file (and its [.sig] if it is a [.mod]).
+      Raises Failure if the file does not exist. *)
+  val program : ?flags:Compile.flags -> elpi:Setup.elpi ->
+    string -> Ast.program * error list
+  val program_from : ?flags:Compile.flags -> elpi:Setup.elpi ->
+    loc:Ast.Loc.t -> digest:Digest.t -> Lexing.lexbuf -> Ast.program * error list
+
+  (** [goal file_list] parses the query,
+      Raises ParseError. *)
+  val goal : elpi:Setup.elpi ->
+    loc:Ast.Loc.t -> text:string -> Ast.query
+  val goal_from : elpi:Setup.elpi ->
+    loc:Ast.Loc.t -> Lexing.lexbuf -> Ast.query
+
+  (** [resolve f] computes the full path of [f] as the parser would do (also)
+      for files recursively accumulated. Raises Failure if the file does not
+      exist. *)
+  val resolve_file : elpi:Setup.elpi -> ?cwd:string -> unit:string -> unit -> string
+
+  (** [std_resolver cwd paths ()] returns a resolver function that looks in cwd
+      and paths (relative to cwd, or absolute) *)
+  val std_resolver :
+    ?cwd:string -> paths:string list -> unit ->
+      (?cwd:string -> unit:string -> unit -> string)
+
+  exception ParseError of Ast.Loc.t * string
+
+  (** [accumulated p] is the list of the accumulate directives of [p] (not of
+      the files it accumulates): the location of each one, and the files that
+      it accumulates, directly or not, by the names that the locations of their
+      contents have. *)
+  val accumulated : Ast.program -> (Ast.Loc.t * string list) list
+end
+
+module Data : sig
+
+  module StrMap = Setup.StrMap
+
+  (* what is assigned to the query variables *)
+  type term
+
+  (* goals suspended via the declare_constraint built-in *)
+  type constraints
+
+  (* user defined state (not goals) *)
+  type state
+
+  (* Pass it to function in the Pp module *)
+  type pretty_printer_context
+
+  (* a solution is an assignment map from query variables (name) to terms,
+   * plus the goals that were suspended and the user defined constraints *)
+  type solution = {
+    assignments : term StrMap.t;
+    constraints : constraints;
+    state : state;
+    pp_ctx : pretty_printer_context;
+    relocate_assignment_to_runtime : target:Compile.program -> depth:int -> string -> (term, string) Stdlib.Result.t (* uvars are turned into discard *)
+  }
+
+  (* Hypothetical context *)
+  type hyp = {
+    hdepth : int;
+    hsrc : term
+  }
+  type hyps = hyp list
+
+  type constant = int
+  module Constants : sig
+
+    module Map : sig
+      include Map.S with type key = constant
+      val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
+      val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+    end
+
+  end
+
+end
+
+module Execute : sig
+
+  type outcome = Success of Data.solution | Failure | NoMoreSteps
+
+  (* Returns the first solution, if any, within the optional steps bound.
+   * Setting delay_outside_fragment (false by default) results in unification
+   * outside the pattern fragment to be delayed (behavior of Teyjus), rather
+   * than abort the execution (default behavior) *)
+  val once : ?max_steps:int -> ?delay_outside_fragment:bool ->
+    Compile.executable -> outcome
+
+  (** Prolog's REPL.
+    [pp] is called on all solutions.
+    [more] is called to know if another solution has to be searched for. *)
+  val loop :
+    ?delay_outside_fragment:bool ->
+    Compile.executable ->
+    more:(unit -> bool) -> pp:(float -> outcome -> unit) -> unit
+end
+
+module Pp : sig
+
+  val term : Data.pretty_printer_context -> Format.formatter -> Data.term -> unit
+  val constraints : Data.pretty_printer_context -> Format.formatter -> Data.constraints -> unit
+  val state : Format.formatter -> Data.state -> unit
+
+  val program : Format.formatter -> Compile.program -> unit
+  val goal : Format.formatter -> Compile.query -> unit
+
+  module Ast : sig
+    val program : Format.formatter -> Ast.program -> unit
+    val query : Format.formatter -> Ast.query -> unit
+  end
+
+end
+
+(* ************************************************************************* *)
+(* ************************* Extension API ********************************* *)
+(* ************************************************************************* *)
+
+(** This API lets one exchange with the host application opaque (primitive)
+    data such as integers or strings as well as algebraic data such OCaml's
+    ADT. No support for binders or unification variables at this point, see
+    the RawData module. *)
+
+
+(** This module defines what embedding and readback functions are *)
+module Conversion : sig
+
+  type ty_ast = TyName of string | TyApp of string * ty_ast * ty_ast list
+
+
+  type extra_goal = ..
+  type extra_goal +=
+    | Unify of Data.term * Data.term
+  
+  type extra_goals = extra_goal list
+
+  type 'a embedding =
+    depth:int ->
+    Data.state -> 'a -> Data.state * Data.term * extra_goals
+
+  type 'a readback =
+    depth:int ->
+    Data.state -> Data.term -> Data.state * 'a * extra_goals
+(*//#region conv*)
+  type 'a t = {
+    ty : ty_ast;
+    pp_doc : Format.formatter -> unit -> unit;
+    pp : Format.formatter -> 'a -> unit;
+    embed : 'a embedding;   (* 'a -> term *)
+    readback : 'a readback; (* term -> 'a *)
+  }
+(*//#endregion*)
+  exception TypeErr of ty_ast * int (*depth*) * Data.term (* a type error at data conversion time *)
+end
+
+(** This module defines what embedding and readback functions are
+    for datatypes that need the context of the program (hypothetical clauses and
+    constraints) *)
+module ContextualConversion : sig
+
+  type ty_ast = Conversion.ty_ast = TyName of string | TyApp of string * ty_ast * ty_ast list
+
+
+  type ('a,'hyps,'constraints) embedding =
+    depth:int -> 'hyps -> 'constraints ->
+    Data.state -> 'a -> Data.state * Data.term * Conversion.extra_goals
+
+  type ('a,'hyps,'constraints) readback =
+    depth:int -> 'hyps -> 'constraints ->
+    Data.state -> Data.term -> Data.state * 'a * Conversion.extra_goals
+
+  type ('a,'h,'c) t = {
+    ty : ty_ast;
+    pp_doc : Format.formatter -> unit -> unit;
+    pp : Format.formatter -> 'a -> unit;
+    embed : ('a,'h,'c) embedding;   (* 'a -> term *)
+    readback : ('a,'h,'c) readback; (* term -> 'a *)
+  }
+
+  type ('hyps,'constraints) ctx_readback =
+    depth:int -> Data.hyps -> Data.constraints ->
+    Data.state -> Data.state * 'hyps * 'constraints * Conversion.extra_goals
+
+  val unit_ctx : (unit,unit) ctx_readback
+  val raw_ctx : (Data.hyps,Data.constraints) ctx_readback
+
+  (* cast *)
+  val (!<) : ('a,unit,unit) t -> 'a Conversion.t
+  val (!<<) : (('a,unit,unit) t -> ('b,unit,unit) t) -> ('a Conversion.t -> 'b Conversion.t)
+
+  (* morphisms *)
+  val (!>)   : 'a Conversion.t -> ('a,'hyps,'constraints) t
+  val (!>>)  : ('a Conversion.t -> 'b Conversion.t) -> ('a,'hyps,'constraints) t -> ('b,'hyps,'constraints) t
+  val (!>>>) : ('a Conversion.t -> 'b Conversion.t -> 'c Conversion.t) -> ('a,'hyps,'constraints) t -> ('b,'hyps,'constraints) t -> ('c,'hyps,'constraints) t
+
+end
+
+
+(** Conversion for Elpi's built-in data types *)
+module BuiltInData : sig
+
+  (** See {!module:Elpi.Builtin} for a few more *)
+  val int    : int Conversion.t
+  val float  : float Conversion.t
+  val string : string Conversion.t
+  val list   : 'a Conversion.t -> 'a list Conversion.t
+  val loc    : Ast.Loc.t Conversion.t
+
+  (* poly "A" is what one would use for, say, [type eq A -> A -> prop] *)
+  val poly   : string -> Data.term Conversion.t
+
+  (* like poly "A" but "A" must be a closed term, e.g. no unification variables
+     and no variables bound by the program (context) *)
+  val closed : string -> (Data.term * int) Conversion.t
+
+  (* any is like poly "X" for X fresh *)
+  val any    : Data.term Conversion.t
+
+  (* The same conversions that can be used in any context *)
+  val intC    : (int,'c,'csts) ContextualConversion.t
+  val floatC  : (float,'c,'csts) ContextualConversion.t
+  val stringC : (string,'c,'csts) ContextualConversion.t
+  val listC   : ('a,'h,'cst) ContextualConversion.t -> ('a list,'h,'cst) ContextualConversion.t
+  val locC    : (Ast.Loc.t,'c,'csts) ContextualConversion.t
+  val polyC   : string -> (Data.term,'c,'csts) ContextualConversion.t
+  val anyC    : (Data.term,'c,'csts) ContextualConversion.t
+
+end
+
+(** Declare data from the host application that is opaque (no syntax), like
+    int but not like list or pair *)
+module OpaqueData : sig
+
+  type doc = string
+  type name = string
+
+  (** The [eq] function is used by unification. Limitation: unification of
+   * two cdata cannot alter the constraint store. This can be lifted in the
+   * future if there is user request.
+   *
+   * If the hconsed is true, then the [readback] function is
+   * automatically hashcons the data using the [eq] and [hash] functions.
+   *)
+  type 'a declaration = {
+    name : name;
+    doc : doc;
+    pp : Format.formatter -> 'a -> unit;
+    compare : 'a -> 'a -> int;
+    hash : 'a -> int;
+    hconsed : bool;
+    constants : (name * 'a) list; (* global constants of that type, eg "std_in" *)
+  }
+
+  val declare : 'a declaration -> 'a Conversion.t
+
+end
+
+(** Declare data from the host application that has syntax, like
+    list or pair but not like int. So far there is no support for
+    data with binder using this API. The type of each constructor is
+    described using a GADT so that the code to build or match the data
+    can be given the right type. Example: define the ADT for "option a"
+{[
+   let option_declaration a = {
+     ty = TyApp("option",a.ty,[]);
+     doc = "The option type (aka Maybe)";
+     pp = (fun fmt -> function
+             | None -> Format.fprintf fmt "None"
+             | Some x -> Format.fprintf fmt "Some %a" a.pp x);
+     constructors = [
+      K("none","nothing in this case",
+        N,                                                   (* no arguments *)
+        B None,                                                   (* builder *)
+        M (fun ~ok ~ko -> function None -> ok | _ -> ko ()));     (* matcher *)
+      K("some","something in this case",
+        A (a,N),                                   (* one argument of type a *)
+        B (fun x -> Some x),                                      (* builder *)
+        M (fun ~ok ~ko -> function Some x -> ok x | _ -> ko ())); (* matcher *)
+     ]
+   }
+
+   ]}
+
+    [K] stands for "constructor", [B] for "build", [M] for "match".
+    Variants [BS] and [MS] give read/write access to the state.
+
+*)
+module AlgebraicData : sig
+
+  type name = string
+  type doc = string
+
+  type ('match_stateful_t,'match_t, 't) match_t =
+    | M of (
+        ok:'match_t ->                   (* cont. to call passing subterms *)
+        ko:(unit -> Data.term) ->     (* cont. to move to next constructor *)
+        't -> Data.term) (* match 't, pass its subterms to ~ok or call ~ko *)
+    | MS of (
+        ok:'match_stateful_t ->
+        ko:(Data.state -> Data.state * Data.term * Conversion.extra_goals) ->
+        't -> Data.state -> Data.state * Data.term * Conversion.extra_goals)
+
+  type ('build_stateful_t,'build_t) build_t =
+    | B of 'build_t
+    | BS of 'build_stateful_t
+
+
+  (** GADT for describing the type of the constructor:
+      - N is the terminator
+      - A(a,...) is an argument of type a (a is a Conversion.t)
+      - S stands for self
+      - C stands for container
+  *)
+  type ('stateful_builder,'builder, 'stateful_matcher, 'matcher,  'self, 'hyps,'constraints) constructor_arguments =
+    (* No arguments *)
+    | N : (Data.state -> Data.state * 'self, 'self, Data.state -> Data.state * Data.term * Conversion.extra_goals, Data.term, 'self, 'hyps,'constraints) constructor_arguments
+    (* An argument of type 'a *)
+    | A : 'a Conversion.t * ('bs,'b, 'ms,'m, 'self, 'hyps,'constraints) constructor_arguments -> ('a -> 'bs, 'a -> 'b, 'a -> 'ms, 'a -> 'm, 'self, 'hyps,'constraints) constructor_arguments
+    (* An argument of type 'a in context 'hyps,'constraints *)
+    | CA : ('a,'hyps,'constraints) ContextualConversion.t * ('bs,'b, 'ms,'m, 'self, 'hyps,'constraints) constructor_arguments -> ('a -> 'bs, 'a -> 'b, 'a -> 'ms, 'a -> 'm, 'self, 'hyps,'constraints) constructor_arguments
+    (* An argument of type 'self *)
+    | S : ('bs,'b, 'ms, 'm, 'self, 'hyps,'constraints) constructor_arguments -> ('self -> 'bs, 'self -> 'b, 'self -> 'ms, 'self -> 'm, 'self, 'hyps,'constraints) constructor_arguments
+    (* An argument of type `T 'self` for a constainer `T`, like a `list 'self`.
+      `S args` above is a shortcut for `C(fun x -> x, args)` *)
+    | C : (('self,'hyps,'constraints) ContextualConversion.t -> ('a,'hyps,'constraints) ContextualConversion.t) * ('bs,'b,'ms,'m,'self, 'hyps,'constraints) constructor_arguments -> ('a -> 'bs, 'a -> 'b, 'a -> 'ms,'a -> 'm, 'self, 'hyps,'constraints) constructor_arguments
+
+  type ('t,'h,'c) constructor =
+    K : name * doc *
+        ('build_stateful_t,'build_t,'match_stateful_t,'match_t,'t,'h,'c) constructor_arguments *   (* args ty *)
+        ('build_stateful_t,'build_t) build_t *
+        ('match_stateful_t,'match_t,'t) match_t
+      -> ('t,'h,'c) constructor
+
+  type ('t,'h,'c) base_declaration = {
+    ty : Conversion.ty_ast;
+    doc : doc;
+    pp : Format.formatter -> 't -> unit;
+    constructors : ('t,'h,'c) constructor list;
+  }
+
+  type ('t,'h,'c) declaration =
+  | Decl : ('t,'h,'c) base_declaration -> ('t,'h,'c) declaration
+  | Param : ('t Conversion.t -> ('t1,'h,'c) declaration) -> ('t1,'h,'c) declaration
+  | ParamC : (('t,'h,'c) ContextualConversion.t -> ('t1,'h,'c) declaration) -> ('t1,'h,'c) declaration
+
+  type allocation
+
+  val allocate_constructors : ('t,'h,'c) declaration -> allocation
+  val declare_allocated : allocation -> ('t,'h,'c) declaration -> ('t,'h,'c) ContextualConversion.t
+  val declare : ('t,'h,'c) base_declaration -> ('t,'h,'c) ContextualConversion.t
+
+end
+
+(* Built-in predicates are implemented in ML using the following FFI.
+   *
+   * The ffi data type uses GADTs to let one describe the type of an OCaml
+   * function. Terms passed to the built-in predicate are then checked against
+   * and converted to their types before being passed to the OCaml code.
+   * The ffi data type is also used to generate the documentation of the
+   * built-in (Elpi code with comments).
+   *
+   * Example: built-in "div" taking two int and returning their division and
+   * remainder. {[
+   *
+   *   Pred("div",
+   *        In(int, "N",
+   *        In(int, "M",
+   *        Out(int, "D",
+   *        Out(int, "R",
+   *          Easy "division of N by M gives D with reminder R")))),
+   *        (fun n m _ _ -> !: (n div m) +! (n mod n)))
+   *  ]}
+   *
+   *   In( type, documentation, ... ) declares an input of a given type.
+   *     In the example above both "n" and "m" are declare as input, and
+   *     as expected the OCaml code receives two inputs (n and m) of type
+   *     int
+   *   Out( type, documentation, ...) declares an input/output argument.
+   *     The OCaml code receives an "int arg" (and not just an int).
+   *     We will detail this later, for now lets ignore that.
+   *   Easy( documentation ) just signals that the built-in does not alter the
+   *     store of custom constraints
+   *
+   *   The OCaml code has to produce a tuple of outputs, the convenience
+   *   notations "!: x" and "x +! y" should be used to produce, respectively,
+   *   the first output and any extra one ("!:" begins the list, "+!" continues
+   *   it). In the example two outputs (division and reminder) are produced.
+   *
+   *   In the ffi declaration above "int" is of type "int data" that is a
+   *   record containing functions to inject/eject integers into terms.
+   *   The function to eject (of_term) does not return an "int" but an
+   *   "int arg"  where "'a arg" can be one of
+   *     Data of 'a | Flex of term | Discard
+   *   For arguments that are described as In in the ffi, only the first
+   *   constructor is allowed (i.e. if the user passes a term that is ejected
+   *   as Flex or Discard a (fatal, run-time) type error is raised).
+   *   For arguments described as Out all 3 cases are valid.
+   *
+   *   Now let's go back to the two arguments the OCaml code discards.
+   *   They are of type "int arg" as a consequence the OCaml code is
+   *   made aware of the user passed. For example
+   *     div 4 2 D _
+   *   would result in the OCaml code being passed: 4, 2, Flex, Discard.
+   *   In such a way the code can decide to not even produce the second
+   *   output, since it is not requested (not very useful in this specific
+   *   case). The notations "?:" and "+?" are like "!:" and "+!" but their
+   *   argument is of type option, so one can output None in response to a
+   *   Discard.
+   *
+   *   The FFI unifies the outputs produces by the OCaml code with the
+   *   terms provided by the user. It is always correct to produce all
+   *   outputs (and ignore the corresponding arguments in OCaml).
+   * *)
+module BuiltInPredicate : sig
+
+  exception No_clause (* signals logical Failure, i.e. demands backtrack *)
+
+  type name = string
+  type doc = string
+
+  type 'a oarg = Keep | Discard
+  type 'a ioarg = private Data of 'a | NoData
+  type once
+
+  type ('function_type, 'inernal_outtype_in, 'internal_hyps, 'internal_constraints) ffi =
+    (* Arguemnts that are translated independently of the program context *)
+    | In    : 't Conversion.t * doc * ('i, 'o,'h,'c) ffi -> ('t -> 'i,'o,'h,'c) ffi
+    | Out   : 't Conversion.t * doc * ('i, 'o * 't option,'h,'c) ffi -> ('t oarg -> 'i,'o,'h,'c) ffi
+    | InOut : 't ioarg Conversion.t * doc * ('i, 'o * 't option,'h,'c) ffi -> ('t ioarg -> 'i,'o,'h,'c) ffi
+
+    (* Arguemnts that are translated looking at the program context *)
+    | CIn    : ('t,'h,'c) ContextualConversion.t * doc * ('i, 'o,'h,'c) ffi -> ('t -> 'i,'o,'h,'c) ffi
+    | COut   : ('t,'h,'c) ContextualConversion.t * doc * ('i, 'o * 't option,'h,'c) ffi -> ('t oarg -> 'i,'o,'h,'c) ffi
+    | CInOut : ('t ioarg,'h,'c) ContextualConversion.t * doc * ('i, 'o * 't option,'h,'c) ffi -> ('t ioarg -> 'i,'o,'h,'c) ffi
+
+    (* The easy case: all arguments are context independent *)
+    | Easy : doc -> (depth:int -> 'o, 'o, unit, unit) ffi
+
+    (* The advanced case: arguments are context dependent, here we provide the
+      context readback function *)
+    | Read : ('h,'c) ContextualConversion.ctx_readback * doc -> (depth:int -> 'h -> 'c -> Data.state -> 'o, 'o,'h,'c) ffi
+    | Full : ('h,'c) ContextualConversion.ctx_readback * doc -> (depth:int -> 'h -> 'c -> Data.state -> Data.state * 'o * Conversion.extra_goals, 'o,'h,'c) ffi
+    | FullHO : ('h,'c) ContextualConversion.ctx_readback * doc -> (once:once -> depth:int -> 'h -> 'c -> Data.state -> Data.state * 'o * Conversion.extra_goals, 'o,'h,'c) ffi
+    | VariadicIn    : ('h,'c) ContextualConversion.ctx_readback * ('t,'h,'c) ContextualConversion.t * doc -> ('t list -> depth:int -> 'h -> 'c -> Data.state -> Data.state * 'o * Conversion.extra_goals, 'o,'h,'c) ffi
+    | VariadicOut   : ('h,'c) ContextualConversion.ctx_readback * ('t,'h,'c) ContextualConversion.t * doc -> ('t oarg list -> depth:int -> 'h -> 'c -> Data.state -> Data.state * ('o * 't option list option) * Conversion.extra_goals, 'o,'h,'c) ffi
+    | VariadicInOut : ('h,'c) ContextualConversion.ctx_readback * ('t ioarg,'h,'c) ContextualConversion.t * doc -> ('t ioarg list -> depth:int -> 'h -> 'c -> Data.state -> Data.state * ('o * 't option list option) * Conversion.extra_goals, 'o,'h,'c) ffi
+
+  (* The FFI of the predicates generated by ppx_elpi, where the context in
+     which the arguments are read back is an object, see the PPX module *)
+  module PPX : sig
+    type ('function_type, 'inernal_outtype_in, 'internal_hyps, 'internal_constraints) ffi =
+      | In            : ('t,'h,'c) ContextualConversion.t * doc * ('i, 'o,'h,'c) ffi -> ('t -> 'i,'o,'h,'c) ffi
+      | Out           : ('t,'h,'c) ContextualConversion.t * doc * ('i, 'o * 't option,'h,'c) ffi -> ('t oarg -> 'i,'o,'h,'c) ffi
+      | InOut         : ('t ioarg,'h,'c) ContextualConversion.t * doc * ('i, 'o * 't option,'h,'c) ffi -> ('t ioarg -> 'i,'o,'h,'c) ffi
+      | Easy          : doc -> (depth:int -> 'h -> 'c -> 'o, 'o,'h,'c) ffi
+      | Read          : doc -> (depth:int -> 'h -> 'c -> Data.state -> 'o, 'o,'h,'c) ffi
+      | Full          : doc -> (depth:int -> 'h -> 'c -> Data.state -> Data.state * 'o * Conversion.extra_goals, 'o,'h,'c) ffi
+      | FullHO        : doc -> (once:once -> depth:int -> 'h -> 'c -> Data.state -> Data.state * 'o * Conversion.extra_goals, 'o,'h,'c) ffi
+      | VariadicIn    : ('t,'h,'c) ContextualConversion.t * doc -> ('t list -> depth:int -> 'h -> 'c -> Data.state -> Data.state * 'o * Conversion.extra_goals, 'o,'h,'c) ffi
+      | VariadicOut   : ('t,'h,'c) ContextualConversion.t * doc -> ('t oarg list -> depth:int -> 'h -> 'c -> Data.state -> Data.state * ('o * 't option list option) * Conversion.extra_goals, 'o,'h,'c) ffi
+      | VariadicInOut : ('t ioarg,'h,'c) ContextualConversion.t * doc -> ('t ioarg list -> depth:int -> 'h -> 'c -> Data.state -> Data.state * ('o * 't option list option) * Conversion.extra_goals, 'o,'h,'c) ffi
+  end
+
+  type t =
+    | Pred : name * ('a,unit,'h,'c) ffi * 'a -> t
+    | ContextualPred : name * ('h,'c) ContextualConversion.ctx_readback * ('a,unit,'h,'c) PPX.ffi * 'a -> t
+
+  (** Tools for InOut arguments.
+   *
+   *  InOut arguments need to be equipped with an 'a ioarg Conversion.t.
+   *  The ioarg adaptor here maps variables to NoData and anything else to the
+   *  to Data of the provided 'a Conversion.t.
+   *
+   *  If the 'a is an atomic data type, eg int, then things are good.
+   *  If the 'a is an algebraic data type then some more work has to be done
+   *  in order to have a good implementation, but the type system cannot
+   *  enforce it hence this documentation. Let's take the example of int option.
+   *  The Conversion.t to be passed is [int ioarg option ioarg Conversion.t],
+   *  that is, ioarg should wrap each type constructor. In this way the user
+   *  can pass non-ground terms. Eg
+   *  given term : X       none       some X              some 3
+   *  readback to: NoData  Data None  Data (Some NoData)  Data (Some (Data 3))
+   *
+   *  Alternatively the data type 'a must be able to represent unification
+   *  variables, such as the raw terms, see [ioarg_any] below. It gives NoData
+   *  if the user passed _ (Discard) and Data t for any other t including
+   *  variables such as X (UnifVar).
+   *
+   *  An example of an API taking advantage of this feature is
+   *    pred typecheck i:term, o:ty, o:diagnostic
+   *  that can be used to both check a term is well typed and backtrack if not
+   *    typecheck T TY ok
+   *  or assert a term is illtyped or to test weather it is illtyped
+   *    typecheck T TY (error _), typecheck T TY Diagnostic
+   *  The ML code can see in which case we are and for example optimize the
+   *  first case by not even generating the error message (since error "message"
+   *  would fail to unify with ok anyway) or the second one by not assigning TY.
+   *)
+  val mkData : 'a -> 'a ioarg
+  val ioargC : ('t,'h,'c) ContextualConversion.t -> ('t ioarg,'h,'c) ContextualConversion.t
+  val ioarg : 't Conversion.t -> 't ioarg Conversion.t
+  val ioargC_flex : ('t,'h,'c) ContextualConversion.t -> ('t ioarg,'h,'c) ContextualConversion.t
+  val ioarg_flex : 't Conversion.t -> 't ioarg Conversion.t
+  val ioarg_any : Data.term ioarg Conversion.t
+
+  module Notation : sig
+
+    (* Handy notation to construct the value generated by built-in predicates.
+      *
+      * "!" means the output is there, while "?" that it may not be.
+      *
+      * "?:" and "!:" begin the sequence of outputs, while "+?" and "+!"
+      * continue.
+      *
+      * Eg  !: 3 +! 4 +? None +? (Some 5)           -->
+      *     ((((), Some 3), Some 4), None), Some 5
+      *)
+    val (?:) : 'a -> unit * 'a
+    val (!:) : 'a -> unit * 'a option
+    val (+?) : 'a -> 'b -> 'a * 'b
+    val (+!) : 'a -> 'b -> 'a * 'b option
+
+  end
+
+  (** Adaptors for standard HO functions *)
+  module HOAdaptors : sig
+
+    type 'a func_A
+    type ('a,'b) func_AB
+    type ('a) func_AB_B
+    type ('a,'b,'c) func_AB_C
+    type ('a,'b) func_ABC_C
+
+    val func_A : 'a Conversion.t -> 'a func_A Conversion.t
+    val func_AB : 'a Conversion.t -> 'b Conversion.t -> ('a,'b) func_AB Conversion.t
+    (* like func_AB but rendered as (func In -> Out); for map1 *)
+    val func_A_B : 'a Conversion.t -> 'b Conversion.t -> ('a,'b) func_AB Conversion.t
+    val func_AB_C : 'a Conversion.t -> 'b Conversion.t -> 'c Conversion.t -> ('a,'b,'c) func_AB_C Conversion.t
+    val func_AB_B : 'a Conversion.t -> string -> ('a) func_AB_B Conversion.t
+    val func_ABC_C : 'a Conversion.t -> 'b Conversion.t -> string -> ('a,'b) func_ABC_C Conversion.t
+
+    val filter1 :
+      once:once -> depth:int ->
+      filter:(('a -> bool) -> 's -> 't) ->
+      'a func_A ->
+      's ->
+      Data.state ->
+      Data.state * 't * Conversion.extra_goals
+
+    val filter2 :
+      once:once -> depth:int ->
+      filter:(('a -> 'b -> bool) -> 's -> 't) ->
+      ('a,'b) func_AB ->
+      's ->
+      Data.state ->
+      Data.state * 't * Conversion.extra_goals
+
+    val map1 :
+      once:once -> depth:int ->
+      map:(('a -> 'c) -> 's -> 't) ->
+      ('a,'c) func_AB ->
+      's ->
+      Data.state ->
+      Data.state * 't * Conversion.extra_goals
+
+    val map2 :
+      once:once -> depth:int ->
+      map:(('a -> 'b -> 'c) -> 's -> 't) ->
+      ('a,'b,'c) func_AB_C ->
+      's ->
+      Data.state ->
+      Data.state * 't * Conversion.extra_goals
+
+    val fold1 :
+      once:once -> depth:int ->
+      fold:(('a -> Data.term -> Data.term) -> 's -> Data.term -> Data.term) ->
+      ('a) func_AB_B ->
+      's ->
+      Data.term ->
+      Data.state ->
+      Data.state * Data.term * Conversion.extra_goals
+
+    val fold2 :
+      once:once -> depth:int ->
+      fold:(('a -> 'b -> Data.term -> Data.term) -> 's -> Data.term -> Data.term) ->
+      ('a,'b) func_ABC_C ->
+      's ->
+      Data.term ->
+      Data.state ->
+      Data.state * Data.term * Conversion.extra_goals
+
+  end
+
+end
+
+(** Setup.init takes a list of declarations of data types and predicates,
+    plus some doc and eventually some Elpi code. All this constitutes the
+    "prelude", that is what is avaiable to an Elpi program *)
+module BuiltIn : sig
+
+  (** Where to print the documentation. For the running example DocAbove
+    * generates
+    *   % [div N M D R] division of N by M gives D with reminder R
+    *   pred div i:int, i:int, o:int, o:int.
+    * while DocNext generates
+    *   pred div % division of N by M gives D with reminder R
+    *    i:int, % N
+    *    i:int, % M
+    *    o:int, % D
+    *    o:int. % R
+    * The latter format it is useful to give longer doc for each argument. *)
+  type doc_spec = DocAbove | DocNext
+
+  (* When an elpi interpreter is set up one can pass a list of
+    * declarations that constitute the base environment in which
+    * programs run *)
+  type declaration =
+    (* Real OCaml code *)
+    | MLCode of BuiltInPredicate.t * doc_spec
+    (* Declaration of an OCaml data *)
+    | MLData : 'a Conversion.t -> declaration
+    | MLDataC : ('a,'h,'c) ContextualConversion.t -> declaration
+    (* Extra doc *)
+    | LPDoc  of string
+    (* Sometimes you wrap OCaml code in regular predicates in order
+      * to implement the desired builtin *)
+    | LPCode of string
+
+  (** What is passed to [Setup.init] *)
+  val declare :
+    file_name:string -> declaration list -> Setup.builtins
+
+  (** Retrieves the builtins associated to [file_name] (and previosuly declared
+      with [declare]). Raises [Not_found] *)
+  val of_file : file_name:string -> Setup.builtins
+
+  (** Prints in LP syntax the "external" declarations.
+    * The file builtin.elpi is generated by calling this API on the
+    * declaration list from elpi_builtin.ml *)
+  val document_fmt : Format.formatter -> ?calc:Setup.calc_descriptor -> Setup.builtins -> unit
+  val document_file : ?header:string  -> ?calc:Setup.calc_descriptor -> Setup.builtins -> unit
+
+end
+
+(* ************************************************************************* *)
+(* ********************* Advanced Extension API **************************** *)
+(* ************************************************************************* *)
+
+(** This API lets one access the low lever representation of terms in order
+    to exchange data with binders and unification variables with the host
+    application. It also lets one define quotations and extend the state
+    theraded by Elpi with custom data. *)
+
+(** State is a collection of purely functional piece of data carried
+   by the interpreter. Such data is kept in sync with the backtracking, i.e.
+   changes made in a branch are lost if that branch fails.
+   It can be used to both store custom constraints to be manipulated by
+   custom solvers, or any other piece of data the host application may
+   need to use. *)
+module State : sig
+
+  val new_state_descriptor : unit -> Setup.state_descriptor
+
+  (** 'a MUST be purely functional, i.e. backtracking is implemented by using
+   * an old binding for 'a.
+   * This limitation can be lifted if there is user request. *)
+  type 'a component
+
+  val declare :
+    name:string ->
+    pp:(Format.formatter -> 'a -> unit) ->
+    init:(unit -> 'a) ->
+    (* run just before the goal is compiled (but after the program is) *)
+    start:('a -> 'a) ->
+      'a component
+  [@@deprecated "Use [declare_component] instead"]
+
+  val declare_component :
+    ?descriptor:Setup.state_descriptor ->
+    name:string ->
+    pp:(Format.formatter -> 'a -> unit) ->
+    init:(unit -> 'a) ->
+    (* run just before the goal is compiled (but after the program is) *)
+    start:('a -> 'a) ->
+    unit ->
+      'a component
+  
+  type t = Data.state
+
+  val get : 'a component -> t -> 'a
+  val set : 'a component -> t -> 'a -> t
+
+  (** Allowed to raise BuiltInPredicate.No_clause *)
+  val update : 'a component -> t -> ('a -> 'a) -> t
+  val update_return : 'a component -> t -> ('a -> 'a * 'b) -> t * 'b
+
+end
+
+(** Flexible data is for unification variables. One can use Elpi's unification
+    variables to represent the host equivalent, here the API the keep a link
+    between the two. *)
+module FlexibleData : sig
+
+  (** key for Elpi's flexible data *)
+  module Elpi : sig
+    type t
+    val make : ?name:string -> Data.state -> Data.state * t
+    val get : name:string -> Data.state -> t option
+    val pp :  Format.formatter -> t -> unit
+    val show :  t -> string
+    val equal : t -> t -> bool
+    val hash : t -> int
+    val fresh : unit -> Ast.Name.t
+
+    (** dbug print *)
+    val pp_raw :  Format.formatter -> t -> unit
+    val show_raw :  t -> string
+  end
+
+  module type Host = sig
+    type t
+    val compare : t -> t -> int
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+  end
+
+  module Map : functor(Host : Host) -> sig
+    type t
+
+    val empty : t
+    val add : Elpi.t -> Host.t -> t -> t
+
+    val remove_elpi : Elpi.t -> t -> t
+    val remove_host : Host.t -> t -> t
+
+    val filter : (Host.t -> Elpi.t -> bool) -> t -> t
+
+    (* The eventual body at its depth *)
+    val fold : (Host.t -> Elpi.t -> Data.term option -> 'a -> 'a) -> t -> 'a -> 'a
+
+    val elpi   : Host.t -> t -> Elpi.t
+    val host : Elpi.t -> t -> Host.t
+
+    val uvmap : t State.component
+
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+  end
+
+  module type Show = sig
+    type t
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+  end
+
+   (** Example from Hol-light + elpi:
+{[
+
+     module UV2STV = FlexibleData.Map(struct
+        type t = int
+        let compare x y = x - y
+        let pp fmt i = Format.fprintf fmt "%d" i
+        let show = string_of_int
+      end)
+
+      let stv = ref 0
+      let incr_get r = incr r; !r
+
+      let record k state =
+        State.update_return UV2STV.uvmap state (fun m ->
+          try m, Stv (UV2STV.host k m)
+          with Not_found ->
+            let j = incr_get stv in
+            UV2STV.add k j m, Stv j)
+
+      (* The constructor name "uvar" is special and has to be used with the
+         following Conversion.t *)
+
+      let hol_pretype = AlgebraicData.declare {
+        ty = TyName "pretype";
+        doc = "The algebraic data type of pretypes";
+        pp = (fun fmt t -> ...);
+        constructors = [
+          ...
+          K("uvar","",A(uvar,N),
+             BS (fun (k,_) state -> record k state),
+             M (fun ~ok ~ko _ -> ko ()))
+        ]
+      }
+
+    ]}
+
+    In this way an Elpi term containig a variable [X] twice gets read back
+    using [Stv i] for the same [i].
+
+  *)
+
+  val uvar : (Elpi.t * Data.term list) Conversion.t
+end
+
+(** Low level module for OpaqueData *)
+module RawOpaqueData : sig
+
+  type name = string
+  type doc = string
+
+  type t = Ast.Opaque.t
+
+ (** If the data_hconsed is true, then the [cin] function below will
+     automatically hashcons the data using the [eq] and [hash] functions. *)
+  type 'a declaration = 'a OpaqueData.declaration = {
+    name : name;
+    doc : doc;
+    pp : Format.formatter -> 'a -> unit;
+    compare : 'a -> 'a -> int;
+    hash : 'a -> int;
+    hconsed : bool;
+    constants : (name * 'a) list; (* global constants of that type, eg "std_in" *)
+  }
+
+  type 'a cdata = private {
+    cin : 'a -> Data.term;
+    cino : 'a -> Ast.Opaque.t;
+    isc : t -> bool;
+    cout: t -> 'a;
+    name : string;
+  }
+
+  val declare : 'a declaration -> 'a cdata * 'a Conversion.t
+
+  module PPX : sig
+    val declare : 'a declaration -> 'a cdata * (*'a Data.Constants.Map.t * *) doc
+  end
+
+  val pp : Format.formatter -> t -> unit
+  val show : t -> string
+  val equal : t -> t -> bool
+  val compare : t -> t -> int
+  val hash : t -> int
+  val name : t -> string
+  val hcons : t -> t
+
+  (* tests if two cdata have the same given type *)
+  val ty2 : 'a cdata -> t -> t -> bool
+  val morph1 : 'a cdata -> ('a -> 'a) -> t -> Data.term
+  val morph2 : 'a cdata -> ('a -> 'a -> 'a) -> t -> t -> Data.term
+  val map : 'a cdata -> 'b cdata -> ('a -> 'b) -> t -> Data.term
+
+  (* Raw builtin *)
+  val int : int cdata
+  val is_int : t -> bool
+  val to_int : t -> int
+  val of_int : int -> Data.term
+
+  val float : float cdata
+  val is_float : t -> bool
+  val to_float : t -> float
+  val of_float : float -> Data.term
+
+  val string : string cdata
+  val is_string : t -> bool
+  val to_string : t -> string
+  val of_string : string -> Data.term
+
+  val loc : Ast.Loc.t cdata
+  val is_loc : t -> bool
+  val to_loc : t -> Ast.Loc.t
+  val of_loc : Ast.Loc.t -> Data.term
+
+end
+
+module Calc : sig
+
+  type operation_declaration = {
+    symbol : string;
+    infix : bool; (* used for the doc *)
+    args : string list list; (* multiple types for the same symbol *)
+    code : Data.term list -> Data.term;
+  }
+
+  (** Registering an operation *)
+  val register : descriptor:Setup.calc_descriptor -> operation_declaration -> unit
+
+  (** An empty descriptor for registering operations *)
+  val new_calc_descriptor : unit -> Setup.calc_descriptor
+
+  (** Standard operations *)
+  val default_calc : operation_declaration list
+
+  (** The [calc] and [is] declarations *)
+  val calc : BuiltIn.declaration list
+
+  (** for use in other builtins *)
+  val eval : depth:int -> State.t -> Data.term -> Data.term
+
+end
+
+  (** This module exposes the low level representation of terms.
+   *
+   * The data type [term] is opaque and can only be accessed by using the
+   * [look] API that exposes a term [view]. The [look] view automatically
+   * substitutes assigned unification variables by their value. *)
+module RawData : sig
+
+  type constant = Ast.Term.constant
+  
+  (** De Bruijn levels (not indexes): the distance of the binder from the root.
+      starts at 0 and grows for bound variables;
+      global constants have negative values. *)
+
+  type builtin = Cut | And | Impl | ImplBang | RImpl | Pi | Sigma | Eq | Match | Findall | Delay | Host of constant
+  type term = Data.term
+  type view = private
+    (* Pure subterms *)
+    | Const of int                        (* global constant or a bound var *)
+    | Lam of term                         (* lambda abstraction, i.e. x\ *)
+    | App of int * term * term list       (* application (at least 1 arg) *)
+    (* Optimizations *)
+    | Cons of term * term                 (* :: *)
+    | Nil                                 (* [] *)
+    (* FFI *)
+    | Builtin of builtin * term list      (* call to a built-in predicate *)
+    | CData of RawOpaqueData.t            (* opaque data *)
+    (* Unassigned unification variables *)
+    | UnifVar of FlexibleData.Elpi.t * term list
+
+  (** Terms must be inspected after dereferencing their head.
+      If the resulting term is UVar then its uvar is such that
+      get_assignment uvar = None *)
+  val look : depth:int -> term -> view
+
+  (* to reuse a term that was looked at *)
+  val kool : view -> term
+
+  (** Smart constructors *)
+  val mkBound : int -> term  (* bound variable, i.e. >= 0 *)
+  val mkLam : term -> term
+  val mkCons : term -> term -> term
+  val mkNil : term
+  val mkDiscard : term
+  val mkCData : RawOpaqueData.t -> term
+  val mkUnifVar : FlexibleData.Elpi.t -> args:term list -> State.t -> term
+
+  (** Lower level smart constructors *)
+  val mkGlobal : constant -> term (* global constant, i.e. < 0 *)
+  val mkAppGlobal  : constant -> term -> term list -> term
+  val mkAppGlobalL : constant -> term list -> term
+  val mkAppBound  : int -> term -> term list -> term
+  val mkAppBoundL : int -> term list -> term
+  
+  val mkBuiltin : builtin -> term list -> term
+
+  (** no check, works for globals and bound *)
+  val mkConst : int -> term
+  val mkApp : int -> term -> term list -> term
+  val mkAppMoreArgs : depth:int -> term -> term list -> term
+  val isApp : depth:int -> term -> bool 
+
+  val cmp_builtin : builtin -> builtin -> int
+
+  (* Data.hyp is now the same type as hyp, hence of_hyp and of_hyps do nothing
+     (they are kept for backward compatibility) *)
+  type hyp = Data.hyp = {
+    hdepth : int;
+    hsrc : term
+  }
+  type hyps = hyp list
+  val of_hyp : Data.hyp -> hyp
+  val of_hyps : Data.hyp list -> hyps
+
+  type blockers = FlexibleData.Elpi.t list
+  type suspended_goal = {
+    context : hyps;
+    goal : int * term;
+    blockers : blockers;
+  }
+  val constraints : Data.constraints -> suspended_goal list
+  val no_constraints : Data.constraints
+
+  module Constants : sig
+
+    val declare_global_symbol : ?variant:int -> string -> constant
+
+    val show : constant -> string
+
+    val orc    : constant (* ; *)
+
+    module Map = Data.Constants.Map
+    module Set : Set.S with type elt = constant
+
+  end
+
+  (* This extra_goal can be used as a target for postprocessing *)
+  type Conversion.extra_goal +=
+  | RawGoal of Data.term
+
+  (* This function is called just before returning from a builtin predicate,
+     it has visibility over all extra_goals and can add or remove some.
+     It must elaborate any extra_goal specific to the host application to
+     either Conversion.Unify or RawData.RawGoal.
+     
+     Since extension to the data type extra_goal are global to all elpi
+     instances, this post-processing function is also global *)
+  val set_extra_goals_postprocessing :
+    ?descriptor:Setup.hoas_descriptor ->
+    (Conversion.extra_goals -> State.t -> State.t * Conversion.extra_goals) -> unit
+
+  val new_hoas_descriptor : unit -> Setup.hoas_descriptor
+
+end
+
+(** This module lets one generate a query by providing a RawData.term directly *)
+module RawQuery : sig
+
+  (** with the possibility to update the state in which the query will run *)
+  val compile_ast :
+    Compile.program -> Ast.query -> (State.t -> State.t) -> Compile.query
+
+  (** generate the query ast term with a function. The resulting term is typed, spilled, etc *)
+  val compile_term :
+    Compile.program -> (State.t -> State.t * Ast.Term.t) -> Compile.query
+  
+  (** generate the query term by hand, the result is used as is *)
+  val compile_raw_term :
+    Compile.program -> (State.t -> State.t * Data.term * Conversion.extra_goals) -> Compile.query
+
+  (** typechecks only if ctx is empty *)
+  val term_to_raw_term :
+    State.t -> Compile.program ->
+    ?ctx:RawData.constant Ast.Scope.Map.t ->
+    depth:int -> Ast.Term.t -> State.t * Data.term
+
+  (** raises Not_found *)
+  val global_name_to_constant : State.t -> string -> RawData.constant
+end
+
+module Quotation : sig
+
+  type quotation = language:Ast.Scope.language -> State.t -> Ast.Loc.t -> string -> Ast.Term.t
+
+  (** The default quotation [{{code}}] *)
+  val set_default_quotation : ?descriptor:Setup.quotations_descriptor -> quotation -> unit
+
+  (** Named quotation [{{name:code}}] *)
+  val register_named_quotation : ?descriptor:Setup.quotations_descriptor -> name:string -> quotation -> Ast.Scope.language
+
+  (** The anti-quotation to lambda Prolog *)
+  val elpi_language : Ast.Scope.language
+  val elpi : quotation
+
+  (** Like quotations but for identifiers that begin and end with
+   * "`" or "'", e.g. `this` and 'that'. Useful if the object language
+   * needs something that looks like a string but with a custom compilation
+   * (e.g. CD.string like but with a case insensitive comparison) *)
+
+  val declare_backtick : ?descriptor:Setup.quotations_descriptor -> name:string ->
+    quotation -> Ast.Scope.language
+
+  val declare_singlequote : ?descriptor:Setup.quotations_descriptor -> name:string ->
+    quotation -> Ast.Scope.language
+
+  val new_quotations_descriptor : unit -> Setup.quotations_descriptor
+
+end
+
+module Utils : sig
+
+  (** A regular error (fatal) *)
+  val error : ?loc:Ast.Loc.t ->string -> 'a
+
+  (** An invariant is broken, i.e. a bug *)
+  val anomaly : ?loc:Ast.Loc.t ->string -> 'a
+
+  (** A type error (in principle ruled out by [elpi-checker.elpi]) *)
+  val type_error : ?loc:Ast.Loc.t ->string -> 'a
+
+  (** A non fatal warning *)
+  val warn : ?loc:Ast.Loc.t -> id:Setup.warning_id -> string -> unit
+
+  (** link between OCaml and LP lists. Note that [1,2|X] is not a valid
+   * OCaml list! *)
+  val list_to_lp_list : Data.term list -> Data.term
+  val lp_list_to_list : depth:int -> Data.term -> Data.term list
+
+  (** no uvars, raises No_clause *)
+  val check_ground : depth:int -> Data.term -> unit 
+
+  (** comparison (need terms to be ground) *)
+  val cmp_term : depth:int -> Data.term -> Data.term -> int
+
+  (** The body of an assignment, if any (LOW LEVEL).
+   * Use [look] and forget about this API since the term you get
+   * needs to be moved and/or reduced, and you have no API for this. *)
+  val get_assignment : FlexibleData.Elpi.t -> Data.term option
+
+  (** Hackish, in particular the output should be a compiled program *)
+  val clause_of_term :
+    ?pp_ctx:Data.pretty_printer_context -> ?name:string -> ?graft:([`After | `Before | `Replace | `Remove] * string) ->
+    depth:int -> Ast.Loc.t -> Data.term -> Ast.program
+
+  (** Hackish *)
+  val term_to_raw_term :
+    State.t -> Compile.program ->
+    ?ctx:RawData.constant Ast.Scope.Map.t ->
+    depth:int -> Ast.Term.t -> Data.term
+
+  (** Lifting/restriction/beta (LOW LEVEL, don't use) *)
+  val move : from:int -> to_:int -> Data.term -> Data.term
+  val beta : depth:int -> Data.term -> Data.term list -> Data.term
+
+  (** readback/embed on lists *)
+  val map_acc :
+    (State.t -> 't -> State.t * 'a * Conversion.extra_goals) ->
+    State.t -> 't list -> State.t * 'a list * Conversion.extra_goals
+
+  module type Show = sig
+    type t
+    val pp : Format.formatter -> t -> unit
+    val show : t -> string
+  end
+
+  module type ShowKey = sig
+    type key
+    val pp_key : Format.formatter -> key -> unit
+    val show_key : key -> string
+  end
+
+  module type Show1 = sig
+    type 'a t
+    val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+    val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
+  end
+
+  module Map : sig
+    module type S = sig
+      include Map.S
+      include Show1 with type 'a t := 'a t
+      val pp_key : Format.formatter -> key -> unit
+      val show_key : key -> string
+    end
+
+    module type OrderedType = sig
+      include Map.OrderedType
+      include Show with type t := t
+    end
+
+    module Make (Ord : OrderedType) : S with type key = Ord.t
+
+  end
+
+  module Set : sig
+
+    module type S = sig
+      include Set.S
+      include Show with type t := t
+    end
+
+    module type OrderedType = sig
+      include Set.OrderedType
+      include Show with type t := t
+    end
+
+    module Make (Ord : OrderedType) : S with type elt = Ord.t
+
+  end
+
+  module IntSet : Set.S with type elt = int
+  module LocSet : Set.S with type elt = Ast.Loc.t
+
+  (* Parses a version string as it parses the elpi one:
+     - drop leading 'v'
+     - drop trailing '-...' or '+...'
+     - splits on '.'
+       - expects 3 numerical components
+       - or 2 numerical components (third one defaults to 0)
+       - or a single component matching "%%.*%%" (defaults to 99.99.99)
+    On error defaults to 0.0.0
+  *)
+  val version_parser : what:string -> string -> int * int * int
+
+end
+
+module RawPp : sig
+  (** If the term is under [depth] binders this is the function that has to be
+   * called in order to print the term correct. WARNING: as of today printing
+   * an open term (i.e. containing unification variables) in the *wrong* depth
+   * can cause the pruning of the unification variable.
+   * This behavior shall be cleaned up in the future *)
+  val term : (*depth*)int -> Format.formatter -> Data.term -> unit
+
+  val constraints : Format.formatter -> Data.constraints -> unit
+
+  val list : ?max:int -> ?boxed:bool ->
+    (Format.formatter -> 'a -> unit) ->
+    ?pplastelem:(Format.formatter -> 'a -> unit) -> string ->
+      Format.formatter -> 'a list -> unit
+
+  module Debug : sig
+    val term : (*depth*)int -> Format.formatter -> Data.term -> unit
+    val show_term : Data.term -> string
+ end
+
+end
+
+module PPX : sig
+
+  module Doc : sig
+    val kind : Format.formatter -> Conversion.ty_ast -> doc:string -> unit
+    val comment : Format.formatter -> string -> unit
+    (* [max_name_len] is the length of the longest constructor name of the
+       type, used to align the declarations *)
+    (* builtin func name Key -> Field1, ..., FieldN, the declaration of an entry of a
+       context: a predicate about a bound variable of type Key *)
+    val context_entry : Format.formatter ->
+      name:string -> doc:string ->
+      key:Conversion.ty_ast ->
+      args:Conversion.ty_ast list -> unit
+    val constructor : Format.formatter ->
+      max_name_len:int -> variant:int -> name:string -> doc:string ->
+     ty:Conversion.ty_ast ->
+     args:Conversion.ty_ast list -> unit
+    type prec_level = Arrow | AppArg
+    val show_ty_ast: ?prec:prec_level -> Conversion.ty_ast -> string
+
+  end
+
+  (** The declarations derived by the ppx *)
+  type declaration
+  val empty_declaration : unit -> declaration
+  val add_declarations : declaration -> BuiltIn.declaration list -> unit
+
+  (** Get the declation list in the right order to initialize elpi *)
+  val to_list : declaration -> BuiltIn.declaration list
+
+  (* The contexts of the data derived by the ppx are objects *)
+  class ctx : Data.hyps ->
+    object
+      method raw : Data.hyps
+    end
+
+  type 'a ctx_entry = { entry : 'a; depth : int }
+  val pp_ctx_entry : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a ctx_entry -> unit
+  val show_ctx_entry : (Format.formatter -> 'a -> unit) -> 'a ctx_entry -> string
+
+  type 'a ctx_field = 'a ctx_entry Data.Constants.Map.t
+
+  (* A context that can be read on top of context 'c, made of items 'a indexed by 'k  *)
+  type ('a,'k,'c,'csts) context = {
+    is_entry_for_bound_var : Data.hyp -> Data.constant option;
+    to_key : depth:int -> 'a -> 'k;
+    push : depth:int -> Data.state -> 'k -> 'a ctx_entry -> Data.state;
+    pop : depth:int -> Data.state -> 'k -> Data.state;
+    conv : (Data.constant * 'a, 'c, 'csts) ContextualConversion.t;
+    init : Data.state -> Data.state;
+    get : Data.state -> 'a ctx_field
+  }
+
+  val readback_context :
+    ('a,'k,'c,'csts) context ->
+    'c ->
+    depth:int ->
+    Data.hyps ->
+    'csts ->
+    Data.state -> Data.state * Conversion.extra_goals
+
+end
+
+(**/**)

@@ -1,7 +1,8 @@
 ---
 # You can also start simply with 'default'
 theme: neversink
-colorSchema: dark
+# auto = dark/light toggle in the toolbar (dark on first visit, see setup/main.ts)
+colorSchema: auto
 # every slide gets strokes; override per slide with `class: lw bg-strokes-soft`
 # (or `layoutClass: lw bg-strokes-soft` on two-cols-header slides)
 defaults:
@@ -38,7 +39,7 @@ hideInToc: true
 
 <div style="text-align: right">
 <br/>
-<span style="font-size: 1.5em; font-weight: 600; color: #fff; vertical-align: -0.15em">Enrico Tassi</span> &nbsp;&nbsp;
+<span class="lw-name">Enrico Tassi</span> &nbsp;&nbsp;
 <a href="https://github.com/gares" style="white-space: nowrap"><mdi-github style="vertical-align: middle"/> @gares</a>
  &nbsp;&nbsp;
 <img src="/inria.svg" alt="Inria" style="display: inline-block; height: 1.3em; vertical-align: middle"> 
@@ -114,156 +115,40 @@ class: lw bg-grid lw-summary
 ---
 
 # Summary
+<Toc minDepth="1" maxDepth="2" />
 
 1. The Elpi programming language
    - logic programming
-   - binders HOAS style
+   - binders H.O.A.S. style
    - Hello World: a type checker for $\lambda_\to$
 2. Interfacing Elpi with OCaml
    - the `Conversion.t` data type
    - the `ffi` GADT
    - autmatic glue code: `ppx_elpi`
 
----
-layout: default
-title: The title
-level: 2
----
 
-# Elpi: [rule-based]{style="background-color: var(--highlight-one)"} [extension language]{style="background-color: var(--highlight-two)"}
-
-<br/>
-
-## [context]{style="background-color: var(--highlight-two)"} &nbsp; extension language (for an ITP written in OCaml)
-
-<!--- no such a thing as general purpose PL-->
-- there is a *host application* and a *host programming language*
-- the opposite of "general purpose" programming language
-
-## [the key]{style="background-color: var(--highlight-one)"} &nbsp; rule-based
-
-- binders and context management
-- holes and scheduling
-- self extension
-
-
----
-layout: center
-level: 2
----
-
-# This talk
-<br/>
-
-<Toc minDepth="1" maxDepth="1" />
 
 
 
 ---
-layout: lw-section
+layout: lw-default
+class: lw lw-run-side
 ---
 
-# The host application
+# Logic Programming
 
----
-layout: image
-image: coq-brain.png
-title: The arcitecture of an ITP
-backgroundSize: 40%
-#transition: slide-left
-level: 2
----
-
-# The architecture of an ITP
-
----
-title: The elaborator
-level: 2
----
-
-# The elaborator...
-
-<style>
-  tr { border-style: none; padding-top: 0rem; padding-bottom: 0rem; }
-  td { border-style: none; padding-top: 0rem; padding-bottom: 0rem; text-align: left !important; }
-</style>
-
-<v-clicks>
-<table>
-<tbody>
-<tr><td> 
-
-$\lambda x.x + 1$
-
-</td></tr>
-<tr><td>
-
-$\lambda x :~ ?_T.~ \mathrm{add~} x~ (S~ O)$
-
-</td><td>
-
-$\Sigma = \{\; ?_T \mapsto \mathrm{some~ type} \;\}$
-
-</td></tr>
-<tr><td>
-
-$\lambda x :~ ?_T.~ \mathrm{add~} ?_s~ x~ (S~ O)$
-
-</td><td>
-
-$\Sigma = \{\; ?_T \mapsto \mathrm{some~ type};  \qquad\quad\;\;?_s \mapsto \mathrm{some~ record} \;\}$
-
-</td><td><mdi-database-search/></td></tr>
-<tr><td>
-
-$\lambda x :~ ?_T.~ \mathrm{add~} ?_{s[x]}~ x~ (S~ O)$
-
-</td><td>
-
-$\Sigma = \{\; ?_T \mapsto \mathrm{some~ type}; \;x :~?_T \vdash ?_s \mapsto \mathrm{some~ record} \;\}$
-
-</td><td><mdi-database-search/></td></tr>
-<tr><td>
-
-$\lambda \;\, :~ ?_T.~ \mathrm{add~} ?_{s[\$1]}~ \$1~ (S~ O)$
-
-</td><td>
-
-$\Sigma = \{\; ?_T \mapsto \mathrm{some~ type}; \;\;\,\; :~?_T \vdash ?_s \mapsto \mathrm{some~ record} \;\}$
-
-</td><td><mdi-database-search/></td></tr>
-</tbody></table>
-</v-clicks>
-
-# ...and its daemons
-
-<v-clicks at="2">
-
-- holes (pointers in a heap)
-- ... and to be filled by user-given rules (database)
-
-</v-clicks>
-
-<v-clicks at="4">
-
-- reduction/substitution (scope)
-- binders (De Bruijn indexes)
-
-</v-clicks>
-
-<!--
-- <v-click at="2">holes: pointers <mdi-biohazard/></v-click>
-- <v-click at="4">reduction/substitution <mdi-bottle-tonic-skull/></v-click>
-- <v-click at="5">binders: numbers <mdi-bomb/></v-click>
--->
-
+<<< @/snippets/logicp.elpi#types elpi {monaco-run}
 
 
 ---
-layout: lw-section
+layout: lw-default
 ---
 
-# The language in a nutshell
+# binders in HOAS
+
+```elpi
+
+```
 
 ---
 layout: two-cols-header
@@ -334,7 +219,7 @@ layout: two-cols-header
 level: 2
 ---
 
-# Elpi = $\lambda$Prolog + CHR
+# Elpi = <span class="normal-case">$\lambda$Prolog</span> + CHR
 
 ::left::
 
@@ -413,130 +298,108 @@ Failure
 ```
 ````
 
-
 ---
-layout: image
-image: chr.png
-level: 2
-backgroundSize: 50%
+layout: lw-section
 ---
 
-# Elpi = $\lambda$Prolog + CHR
+# Interfacing Elpi with OCaml
 
+---
+layout: lw-default
+---
+
+# Conversion
+
+```ocaml
+module Conversion : sig
+  type 'a t = {
+    ty : ty_ast;
+    pp_doc : Format.formatter -> unit -> unit;
+    pp : Format.formatter -> 'a -> unit;
+    embed : 'a embedding;   (* 'a -> term *)
+    readback : 'a readback; (* term -> 'a *)
+  }
+
+module BuiltInData : sig
+  val int    : int Conversion.t
+  val float  : float Conversion.t
+  val string : string Conversion.t
+  val list   : 'a Conversion.t -> 'a list Conversion.t
+  type diagnostic = OK | ERROR of string
+  val diagnostic : diagnostic API.Conversion.t
+
+```
+
+---
+layout: lw-default
+---
+
+# the `ffi` GADT
+
+```ocaml
+type ('function_type, 'inernal_outtype_in, 'internal_hyps, 'internal_constraints) ffi =
+    | In    : 't Conversion.t * doc * ('i, 'o,'h,'c) ffi -> ('t -> 'i,'o,'h,'c) ffi
+    | Out   : 't Conversion.t * doc * ('i, 'o * 't option,'h,'c) ffi -> ('t -> 'i,'o,'h,'c) ffi
+    | Easy : doc -> (depth:int -> 'o, 'o, unit, unit) ffi
+
+type t = Pred : name * ('a,unit,'h,'c) ffi * 'a -> t
+
+let builtin =
+  MLCode (Pred ("sys.readdir",
+    In  (string, "DirPath",
+    Out (list string, "Contents",
+    Out (diagnostic, "Diagnostic",
+    Easy "is like [Sys.readdir]. It succeeds if [Diagnostic = ok] and [Contents] is the list of files
+          in [DirPath] or [Diagnostic = error Msg] and [Msg] describes an encountered system error."))),
+  (fun path _ _ ~depth:_ ->
+    match Sys.readdir path |> Array.to_list with
+    | contents -> !: contents +! OK
+    | exception Sys_error e -> ?: None +! ERROR e))),
+
+```
 
 ---
 layout: two-cols-header
-level: 2
-backgroundSize: 50%
 ---
 
-# Elpi's take on locally nameless
-
-<style>
-.slidev-code { font-size: 1.4em !important; }
-.slidev-code-magic-move { --slidev-code-font-size: 1.4em !important; }
-</style>
-
-
-<br/>
-
-#### De Bruijn introduced two notations for bound variables: indexes and levels
+# autmatic glue code: `ppx_elpi`
 
 ::left::
 
-#### $\beta$-reduction (with indexes)
+```ocaml
+type ty = Arr of ty * ty | Int
+[@@deriving elpi]
 
-$$
-\begin{array}{l}
-\lambda x.(\lambda y.\lambda z.f\ x_2\ y_1\ z_0)\ x_0\ \to_\beta \\
-\lambda x.\quad\;\;\,\lambda z.f\ x_1\ x_1\ z_0
-\end{array}
-$$
+type tctx = CtxEntry of (string[@elpi.key "term"]) * ty
+[@@elpi.index (module String)]
+[@@deriving elpi]
 
-
-<br/>
-
-#### Moving under a binder (with indexes)
-
-```elpi
-⊢ lam x\ lam y\ app x₁ y₀
+type term =
+  | Var of { name : string } [@elpi.var tctx]
+  | App of { fun_ : term; arg : term }
+  | Lam of { name : string;
+             ty : ty;
+             body : (term[@elpi.binder "term" tctx
+                        (fun name ty -> CtxEntry (name, ty))]) }
+[@@deriving elpi]
 ```
-
-````md magic-move
-
-```
-```
-
-```elpi
-c₀ ⊢ (x\ lam y\ app x₁ y₀) c₀
-```
-
-```elpi
-c₀ ⊢ lam y\ app c₀ y₀
-```
-
-```elpi
-c₀ c₁ ⊢ (y\ app c₀ y₀) c₁
-```
-
-```elpi
-c₀ c₁ ⊢ app c₀ c₁
-```
-
-````
 
 ::right::
 
-#### $\beta$-reduction (with levels)
-
-
-$$
-\begin{array}{l}
-\lambda x.(\lambda y.\lambda z.f\ x_0\ y_1\ z_2)\ x_0\ \to_\beta\\
-\lambda x.\quad\;\;\,\lambda z.f\ x_0\ x_0\ z_1
-\end{array}
-$$
-
-<br/>
-
-#### Moving under a binder (with levels)
-
 ```elpi
-⊢ lam x\ lam y\ app x₀ y₁
+builtin data ty.
+builtin symb arr : ty -> ty -> ty = "0".  % Arr
+builtin symb int : ty = "0".  % Int
+
+builtin func ctxentry term -> string, ty.
+
+
+builtin data term.
+builtin symb app : term -> term -> term = "0".  % App
+builtin symb lam : string -> ty -> (term -> term) -> term = "0".  % Lam
+
+
 ```
-
-````md magic-move
-
-```
-```
-
-```elpi
-c₀ ⊢ (x\ lam y\ app x₀ y₁) c₀
-```
-
-```elpi
-c₀ ⊢ lam y\ app c₀ y₁
-```
-
-```elpi
-c₀ c₁ ⊢ (y\ app c₀ y₁) c₁
-```
-
-```elpi
-c₀ c₁ ⊢ app c₀ c₁
-```
-
-````
-
-<v-click at="9">
-
-#### Benefits
-- Crossing a binder is cheap
-- Indexing the context is easy
-
-</v-click>
-
-
 
 ---
 layout: lw-section

@@ -1,7 +1,7 @@
 
 
 slides.pdf: slides.md Makefile
-	npm exec slidev -- export --with-clicks --format png --output slides.png/
+	npm exec slidev -- export --dark --with-clicks --format png --output slides.png/
 	convert slides.png/*.png slides.pdf
 	rm -rf slides.png/
 
