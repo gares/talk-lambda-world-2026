@@ -1,8 +1,10 @@
 /*
  * Elpi code runner for Slidev.
  *
- * Requires setup/elpi.js: Elpi compiled with js_of_ocaml, see the js/
- * folder in the elpi project.
+ * Programs run in the Elpi language server (setup/elpi-lsp.ts, method
+ * elpi/run), the same one that gives diagnostics and hover in the editors.
+ * The query is `main`, run for at most 1e6 steps: a loop stops in about a
+ * second with the error "no more steps".
  *
  * Usage in slides.md: an editable block, run on load and on every edit,
  * with the output (printed text, errors, Success./Failure.) below it.
@@ -45,28 +47,7 @@
  */
 
 import { defineCodeRunnersSetup } from '@slidev/types'
-
-interface ElpiResult {
-  status: 'success' | 'failure' | 'error'
-  output: string
-  errors: string[]
-}
-type ElpiRun = (program: string) => ElpiResult
-
-let elpiRun: Promise<ElpiRun> | undefined
-
-function loadElpi(): Promise<ElpiRun> {
-  elpiRun ??= import('./elpi.js?raw').then(({ default: source }) => {
-    const script = document.createElement('script')
-    script.textContent = source
-    document.head.appendChild(script)
-    const run = (globalThis as any).run as ElpiRun | undefined
-    if (typeof run !== 'function')
-      throw new Error('setup/elpi.js did not export run()')
-    return run
-  })
-  return elpiRun
-}
+import { elpiLsp } from './elpi-lsp'
 
 // Escape Elpi's output and keep its line breaks as <br/>.
 function toHtml(text: string, cls?: string) {
@@ -81,8 +62,7 @@ function toHtml(text: string, cls?: string) {
 export default defineCodeRunnersSetup(() => {
   return {
     async elpi(code) {
-      const run = await loadElpi()
-      const { status, output, errors } = run(code)
+      const { status, output, errors } = await elpiLsp().run(code)
       const out = []
       if (output.trim() !== '')
         out.push(toHtml(output.trimEnd()))

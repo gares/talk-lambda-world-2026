@@ -386,7 +386,7 @@ type term =
 
 ::right::
 
-```elpi
+```elpi {monaco}
 builtin data ty.
 builtin symb arr : ty -> ty -> ty = "0".  % Arr
 builtin symb int : ty = "0".  % Int
