@@ -78,6 +78,15 @@
   background-image: linear-gradient(rgba(0,0,0,.82), rgba(0,0,0,.82)), url('/lw/bg-texture.png');
 }
 .lw-section { display: flex; flex-direction: column; justify-content: center; }
+
+/* background picker, per slide: `class: lw bg-strokes` (layoutClass for two-cols-header) */
+.slidev-layout.lw.bg-grid        { background-image: url('/lw/bg-grid.png'); }
+.slidev-layout.lw.bg-texture     { background-image: linear-gradient(rgba(0,0,0,.82), rgba(0,0,0,.82)), url('/lw/bg-texture.png'); }
+.slidev-layout.lw.bg-strokes     { background-image: url('/lw/bg-strokes.png'); }
+.slidev-layout.lw.bg-strokes-soft { background-image: url('/lw/bg-strokes-soft.png'); }
+.slidev-layout.lw.bg-noise       { background-image: url('/lw/bg-noise.png'); }
+.slidev-layout.lw.bg-diagonal    { background-image: url('/lw/bg-diagonal.png'); }
+.slidev-layout.lw.bg-plain       { background-image: none; }
 .lw-section h1 { font-size: 3.4rem; line-height: 1.1; }
 
 /* cover */
@@ -90,3 +99,19 @@
 .lw-end-body { margin-top: 2rem; }
 .lw-end h1 { font-size: 3rem; }
 .lw .chip + a, .lw-end-body a { color: #fff; border: 0; }
+
+/* image credits, bottom-left: <div class="lw-credit">...</div> */
+.lw .lw-credit { position: absolute; left: 3rem; bottom: .8rem; font-size: .55rem; color: #ccc; background: rgba(0,0,0,.75); padding: .1rem .4rem; border-radius: 3px; }
+.lw .lw-credit a { color: #aaa; border: 0; }
+
+/* summary / agenda: big yellow numbers, plain markdown on a slide with
+   `class: lw lw-summary`:
+     1. Part one
+        - sub item
+     2. Part two                                                       */
+.lw.lw-summary ol { list-style: none; counter-reset: lw-sum; margin: 3.5rem 0 0 2rem; padding: 0; }
+.lw.lw-summary ol > li { counter-increment: lw-sum; position: relative; padding-left: 7.5rem; margin-bottom: 2.5rem; font-size: 2rem; font-weight: 600; line-height: 1.2; color: #fff; }
+.lw.lw-summary ol > li::before { content: counter(lw-sum, decimal-leading-zero); position: absolute; left: 0; top: -.15em; font-family: var(--lw-display); font-style: italic; font-size: 3.5rem; line-height: 1; color: var(--lw-yellow); }
+.lw.lw-summary ol > li::marker { content: none; }
+.lw.lw-summary ol ul { margin-top: .6rem; font-size: 1.3rem; font-weight: 400; color: #ddd; }
+.lw.lw-summary ol ul li { margin-bottom: .2em; line-height: 1.4; }

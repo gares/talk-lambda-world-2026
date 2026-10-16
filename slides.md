@@ -2,9 +2,13 @@
 # You can also start simply with 'default'
 theme: neversink
 colorSchema: dark
+# every slide gets strokes; override per slide with `class: lw bg-strokes-soft`
+# (or `layoutClass: lw bg-strokes-soft` on two-cols-header slides)
 defaults:
-  class: lw
-  layoutClass: lw
+  class: lw bg-strokes
+  layoutClass: lw bg-strokes
+# the title slide keeps the grid
+class: lw bg-grid
 # random image from a curated Unsplash collection by Anthony
 # like them? see https://unsplash.com/collections/94734566/slidev
 # background: https://cover.sli.dev
@@ -44,6 +48,81 @@ hideInToc: true
 <!--
 First of all thanks the orga
 -->
+
+---
+layout: lw-default
+level: 2
+hideInToc: true
+---
+
+# One language to rule them all!
+
+<div class="h-full flex items-center justify-center">
+  <img src="/One_Ring_Blender_Render.png" alt="The One Ring" class="max-h-100 object-contain" />
+</div>
+
+<div class="lw-credit">Par Peter J. Yost — Travail personnel, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=98351026">https://commons.wikimedia.org/w/index.php?curid=98351026</a></div>
+
+---
+layout: lw-default
+level: 2
+hideInToc: true
+---
+
+# Nope, two is better than one!
+
+<div class="h-full flex items-center justify-center gap-16">
+  <img src="/One_Ring_Blender_Render.png" alt="The One Ring" class="max-h-90 object-contain" />
+  <img src="/One_Ring_Blender_Render2.png" alt="The One Ring" class="max-h-90 object-contain" />
+</div>
+
+<div class="lw-credit">Par Peter J. Yost — Travail personnel, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=98351026">https://commons.wikimedia.org/w/index.php?curid=98351026</a></div>
+
+---
+layout: lw-default
+level: 2
+hideInToc: true
+---
+
+<div class="grid grid-cols-2 gap-12 h-full items-center text-center">
+<div>
+
+## OCaml
+
+<div class="h-48 mt-6 flex items-center justify-center">
+  <img src="/ocaml-logo.svg" alt="OCaml logo" class="on-white h-24" />
+</div>
+
+</div>
+<div>
+
+## Elpi
+
+<div class="h-48 mt-6 flex items-center justify-center">
+  <img src="/rocq-elpi-logo.png" alt="Elpi logo" class="on-white h-40" />
+</div>
+
+</div>
+</div>
+
+---
+layout: lw-default
+level: 2
+hideInToc: true
+title: Summary
+class: lw bg-grid lw-summary
+---
+
+# Summary
+
+1. The Elpi programming language
+   - logic programming
+   - binders HOAS style
+   - Hello World: a type checker for $\lambda_\to$
+2. Interfacing Elpi with OCaml
+   - the `Conversion.t` data type
+   - the `ffi` GADT
+   - autmatic glue code: `ppx_elpi`
 
 ---
 layout: default
@@ -1363,31 +1442,12 @@ title: Thanks
 </div>
 
 ---
-layout: image-right
-image: grill.svg
-backgroundSize: 80%
+layout: lw-end
 level: 2
 title: Thanks
 ---
 
 # Thanks for listening! {style="text-align:center"}
 
-<br/>
 
-[Elpi: rule-based extension language]{style="font-weight: bold"}
-
-<style>
-  tr { border-style: none; padding-top: 0.1rem; padding-bottom: 0.1rem; }
-  td { border-style: none; padding-top: 0.1rem; padding-bottom: 0.1rem; text-align: left !important; }
-</style>
-<table><tbody>
-<tr ><td style="text-align: right !important;">Candidate:</td><td>Enrico Tassi</td></tr>
-<tr ><td style="text-align: right !important;">Date:</td><td>9/1/2026</td></tr>
-<tr ><td style="text-align: right !important;">Jury:</td><td>Catherine Dubois</td></tr>
-<tr ><td ></td><td>Dale Miller</td></tr>
-<tr ><td ></td><td>Brigitte Pientka</td></tr>
-<tr ><td ></td><td>Alberto Momigliano</td></tr>
-<tr ><td ></td><td>Christine Paulin-Mohring</td></tr>
-<tr ><td ></td><td>Yves Bertot</td></tr>
-</tbody></table>
 
