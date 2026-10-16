@@ -1,7 +1,10 @@
 ---
 # You can also start simply with 'default'
 theme: neversink
-color: rocq
+colorSchema: dark
+defaults:
+  class: lw
+  layoutClass: lw
 # random image from a curated Unsplash collection by Anthony
 # like them? see https://unsplash.com/collections/94734566/slidev
 # background: https://cover.sli.dev
@@ -12,15 +15,13 @@ info: |
   Presentation slides for developers.
 
   Learn more at [Sli.dev](https://sli.dev)
-# apply unocss classes to the current slide
-class: text-center
 # https://sli.dev/features/drawing
 drawings:
   persist: false
 # slide transition: https://sli.dev/guide/animations.html#slide-transitions
 # enable MDC Syntax: https://sli.dev/features/mdc
 mdc: true
-layout: cover
+layout: lw-cover
 ximage: logo.png
 transition: fade
 level: 2
@@ -82,8 +83,7 @@ level: 2
 
 
 ---
-layout: section
-color: rocq
+layout: lw-section
 ---
 
 # The host application
@@ -183,8 +183,7 @@ $\Sigma = \{\; ?_T \mapsto \mathrm{some~ type}; \;\;\,\; :~?_T \vdash ?_s \mapst
 
 
 ---
-layout: section
-color: rocq
+layout: lw-section
 ---
 
 # The language in a nutshell
@@ -463,8 +462,7 @@ c₀ c₁ ⊢ app c₀ c₁
 
 
 ---
-layout: section
-color: rocq
+layout: lw-section
 ---
 
 # The integration in Rocq
@@ -725,8 +723,7 @@ compile {{ forall x, lp:(Ty x) }} R Todo (pi x\ C x) :-
 
 
 ---
-layout: section
-color: rocq
+layout: lw-section
 ---
 
 # The good company
@@ -855,8 +852,7 @@ To the best of my knowledge, on 1/1/2026 {style="text-align:center"}
 
 
 ---
-layout: section
-color: rocq
+layout: lw-section
 ---
 
 # What makes me proud
@@ -1121,8 +1117,7 @@ Proof. rewrite /f1 /f2 /f3. ring. Qed.
 
 
 --
-layout: section
-color: rocq
+layout: lw-section
 --
 
 # Elpi in a nutshell
@@ -1192,8 +1187,7 @@ goal :- subgoal1, subgoal2...
 
 
 --
-layout: section
-color: rocq
+layout: lw-section
 transition: fade
 --
 
@@ -1204,8 +1198,7 @@ https://github.com/LPCIC/coq-elpi/
 
 
 ---
-layout: section
-color: rocq
+layout: lw-section
 ---
 
 # Conclusion
