@@ -6,7 +6,7 @@ color: rocq
 # like them? see https://unsplash.com/collections/94734566/slidev
 # background: https://cover.sli.dev
 # some information about your slides (markdown enabled)
-title: "Elpi: rule-based extension language"
+title: "Syntax trees with binders made easy: the Elpi programming language"
 info: |
   ## Slidev Starter Template
   Presentation slides for developers.
@@ -29,20 +29,14 @@ hideInToc: true
 # In this talk I give a gentle introduction to logic programming and how its rule-based nature makes it easy to manipulate syntax trees that contain binders or that are incomplete. I then focus on how Elpi can be used to extend an OCaml application via its foreign function interface.
 ---
 
-# Elpi: rule-based extension language
+## Syntax trees with binders made easy<br/> the Elpi programming language
 
 <style>
   tr { border-style: none; padding-top: 0.1rem; padding-bottom: 0.1rem; }
   td { border-style: none; padding-top: 0.1rem; padding-bottom: 0.1rem; text-align: left !important; }
 </style>
 <table><tbody>
-<tr ><td style="text-align: right !important;">Candidate:</td><td>Enrico Tassi</td></tr>
-<tr ><td style="text-align: right !important;">Jury:</td><td>Catherine Dubois, Professeur, ENSIIE </td></tr>
-<tr ><td ></td><td>Dale Miller, Directeur de Recherche, Inria</td></tr>
-<tr ><td ></td><td>Brigitte Pientka, Full Professor, McGill University</td></tr>
-<tr ><td ></td><td>Alberto Momigliano, Associate Professor, University of Milan</td></tr>
-<tr ><td ></td><td>Christine Paulin-Mohring, Professeur, Université Paris-Saclay</td></tr>
-<tr ><td ></td><td>Yves Bertot, Directeur de Recherche, Inria</td></tr>
+<tr ><td style="text-align: right !important;"></td><td>Enrico Tassi</td></tr>
 </tbody></table>
 
 <div style="text-align: right !important;">HDR 9/1/2026</div>
