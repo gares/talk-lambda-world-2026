@@ -140,7 +140,7 @@ class: lw lw-run-side
 
 # Logic Programming
 
-<<< @/snippets/logicp.elpi#types elpi {monaco-run}
+<<< @/snippets/logicp.elpi elpi {monaco-run}
 
 
 ---

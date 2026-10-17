@@ -7,6 +7,11 @@
  * the server checks it on every change and publishes diagnostics, shown as
  * Monaco markers; hovering asks the server for the type of what is under the
  * mouse.
+ *
+ * The code between the comments % hidden and % hidden-end (on lines of
+ * their own) is folded when the editor opens: the editor, the server and the
+ * runner have the whole code, the slide shows the rest. The line of
+ * % hidden stays visible, e.g. % hidden: the facts.
  */
 
 import type { Diagnostic } from './elpi-lsp'
@@ -62,6 +67,50 @@ function setupElpi(monaco: Monaco) {
   }
   monaco.editor.getModels().forEach(track)
   monaco.editor.onDidCreateModel(track)
+
+  // folding: the ranges between % hidden and % hidden-end (they can nest)
+  const begin = /^\s*%\s*hidden(?![\w-])/
+  const end = /^\s*%\s*hidden-end\b/
+  monaco.languages.registerFoldingRangeProvider('elpi', {
+    provideFoldingRanges(model) {
+      const ranges = []
+      const open: number[] = []
+      for (let line = 1; line <= model.getLineCount(); line++) {
+        const text = model.getLineContent(line)
+        if (begin.test(text))
+          open.push(line)
+        else if (end.test(text) && open.length > 0)
+          ranges.push({ start: open.pop()!, end: line, kind: monaco.languages.FoldingRangeKind.Region })
+      }
+      return ranges
+    },
+  })
+
+  // the folds are closed when the editor opens. The folding ranges are
+  // computed asynchronously: folding is tried again until some lines are
+  // hidden (for at most two seconds), not after, so that what the user opens
+  // stays open
+  const visibleLines = (editor: import('monaco-editor').editor.ICodeEditor) =>
+    editor.getVisibleRanges().reduce((n, r) => n + r.endLineNumber - r.startLineNumber + 1, 0)
+  const foldOnOpen = (editor: import('monaco-editor').editor.ICodeEditor) => {
+    const model = editor.getModel()
+    if (!model || model.getLanguageId() !== 'elpi' || !model.getLinesContent().some(l => begin.test(l)))
+      return
+    let tries = 20
+    const fold = () => {
+      const before = visibleLines(editor)
+      editor.trigger('elpi', 'editor.foldAll', null)
+      setTimeout(() => {
+        if (visibleLines(editor) === before && --tries > 0)
+          fold()
+      }, 100)
+    }
+    fold()
+  }
+  monaco.editor.onDidCreateEditor((editor) => {
+    foldOnOpen(editor) // Slidev gives the model when it creates the editor
+    editor.onDidChangeModel(() => foldOnOpen(editor))
+  })
 
   // hover: the type of the symbol under the mouse
   monaco.languages.registerHoverProvider('elpi', {
