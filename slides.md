@@ -123,24 +123,66 @@ class: lw bg-grid lw-summary
 1. The Elpi programming language
    - logic programming
      - syntax, unif, rules; age two ways
-     - backtrack
+     - backtrack; older
      - findall
    - binders H.O.A.S. style
-     - F, beta, function space
-     - lambda
+     - F, beta, function space, HO unif
+     - lambda ADT
    - Hello World: a type checker for $\lambda_\to$
      - run, explain
-     - constraints
+     - constraints, omega
 2. Interfacing Elpi with OCaml
    - the `Conversion.t` data type
-   - the `ffi` GADT
+   - the `ffi` GADT (better a builtin directly)
    - autmatic glue code: `ppx_elpi`
 3. Again on ext lang
    - user #1
 
 
 
+---
+layout: lw-default
+timeline:
+  - year: 1965
+    short: Unification
+    what: the resolution proof method
+    people:
+      - { name: J. Alan Robinson, img: /history/robinson.jpg }
+  - year: 1972–74
+    short: Prolog
+    what: Horn clauses as programs, SLD-resolution
+    people:
+      - { name: Alain Colmerauer, img: /history/colmerauer.jpg }
+      - { name: Robert Kowalski, img: /history/kowalski.jpg }
+  - year: 1983
+    short: WAM
+    what: the Warren Abstract Machine
+    people:
+      - { name: David H. D. Warren, img: /history/warren.jpg }
+  - year: 1986
+    short: λProlog
+    what: higher-order Logic Programming
+    people:
+      - { name: Dale Miller, img: /history/miller.jpg }
+      - { name: Gopalan Nadathur, img: /history/nadathur.jpg }
+  - year: 1991
+    short: CHR
+    what: Constraint Handling Rules
+    people:
+      - { name: Thom Frühwirth }
+  - year: 2015
+    short: Elpi
+    what: λProlog + CHR, an extension language
+    people:
+      - { name: Enrico Tassi, img: /avatars/gares.jpg }
+      - { name: Claudio Sacerdoti Coen, img: /avatars/sacerdot.jpg }
+---
 
+# History
+
+<Timeline :items="$frontmatter.timeline" />
+
+<div class="lw-credit">Photos: Robinson by D. Monniaux (CC BY-SA 3.0), Colmerauer by Alaindavid2 (CC BY-SA 4.0), Kowalski by Yongyuth (CC BY 3.0), Wikimedia Commons; Warren: academia.edu; Miller: researchr.org; Nadathur: his homepage</div>
 
 ---
 layout: lw-default

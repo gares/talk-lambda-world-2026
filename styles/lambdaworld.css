@@ -179,7 +179,7 @@ html:not(.dark) .lw-logo { filter: invert(1); }
 .lw .chip + a, .lw-end-body a { color: var(--lw-fg); border: 0; }
 
 /* image credits, bottom-left: <div class="lw-credit">...</div> */
-.lw .lw-credit { position: absolute; left: 3rem; bottom: .8rem; font-size: .55rem; color: var(--lw-credit-fg); background: var(--lw-credit-bg); padding: .1rem .4rem; border-radius: 3px; }
+.lw .lw-credit { position: absolute; left: 3rem; right: 9rem; width: fit-content; bottom: .8rem; font-size: .55rem; color: var(--lw-credit-fg); background: var(--lw-credit-bg); padding: .1rem .4rem; border-radius: 3px; }
 .lw .lw-credit a { color: var(--lw-credit-fg); border: 0; }
 
 /* summary / agenda: big yellow numbers, plain markdown on a slide with
