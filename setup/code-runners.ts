@@ -7,7 +7,10 @@
  * second with the error "no more steps".
  *
  * Usage in slides.md: an editable block, run on load and on every edit,
- * with the output (printed text, errors, Success./Failure.) below it.
+ * with the output below it: what the program printed, the errors of the
+ * query and of the run, and Success./Failure./Error. The errors and warnings
+ * of the program are not repeated there: they are underlined in the code
+ * (setup/monaco.ts).
  *
  *   ```elpi {monaco-run}
  *   main :- print "hello".
@@ -62,6 +65,7 @@ function toHtml(text: string, cls?: string) {
 export default defineCodeRunnersSetup(() => {
   return {
     async elpi(code) {
+      // diagnostics are left out: they are underlined in the editor
       const { status, output, errors } = await elpiLsp().run(code)
       const out = []
       if (output.trim() !== '')
@@ -72,6 +76,8 @@ export default defineCodeRunnersSetup(() => {
         out.push({ text: 'Success.', class: 'text-green-500' })
       else if (status === 'failure')
         out.push({ text: 'Failure.', class: 'text-orange-500' })
+      else
+        out.push({ text: 'Error.', class: 'text-red-500' })
       return out
     },
   }

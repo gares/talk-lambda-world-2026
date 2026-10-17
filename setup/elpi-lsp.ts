@@ -7,7 +7,10 @@
  * the elpi repository by `make build-lsp-web` (lsp/elpi-lsp-web.js).
  * Besides the standard LSP requests it answers
  *   elpi/run { text | textDocument: { uri }, query, maxSteps? }
- *     -> { status: 'success' | 'failure' | 'error', output, errors: string[] }
+ *     -> { status: 'success' | 'failure' | 'error', output,
+ *          errors: string[], diagnostics: string[] }
+ * where diagnostics are the errors and warnings of the program (the ones
+ * underlined in the editor) and errors the ones of the query and of its run
  * (running out of steps is a failure with the error "no more steps").
  */
 
@@ -21,6 +24,7 @@ export interface RunResult {
   status: 'success' | 'failure' | 'error'
   output: string
   errors: string[]
+  diagnostics: string[]
 }
 
 class ElpiLsp {

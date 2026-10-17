@@ -1,4 +1,7 @@
 ---
+# URLs like index.html#/5: work from file:// (make html.local) and on any
+# static web server, also when reloading a slide
+routerMode: hash
 # You can also start simply with 'default'
 theme: neversink
 # auto = dark/light toggle in the toolbar (dark on first visit, see setup/main.ts)
