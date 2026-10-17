@@ -7,10 +7,11 @@
  * second with the error "no more steps".
  *
  * Usage in slides.md: an editable block, run on load and on every edit,
- * with the output below it: what the program printed, the errors of the
- * query and of the run, and Success./Failure./Error. The errors and warnings
- * of the program are not repeated there: they are underlined in the code
- * (setup/monaco.ts).
+ * with the output below it: what the program printed, Success./Failure./Error.,
+ * and the errors of the query and of the run. The errors and warnings
+ * of the program are underlined in the code (setup/monaco.ts); a program with
+ * errors runs without the rules that have errors, and a warning below the
+ * code says so.
  *
  *   ```elpi {monaco-run}
  *   main :- print "hello".
@@ -66,18 +67,29 @@ export default defineCodeRunnersSetup(() => {
   return {
     async elpi(code) {
       // diagnostics are left out: they are underlined in the editor
-      const { status, output, errors } = await elpiLsp().run(code)
+      let result
+      try {
+        result = await elpiLsp().run(code)
+      }
+      catch (e) {
+        // the server could not run the code at all
+        return [toHtml(e instanceof Error ? e.message : String(e), 'text-red-500'),
+          { text: 'Error.', class: 'text-red-500' }]
+      }
+      const { status, output, errors } = result
+      // what the program printed, the result, then the errors (the last one
+      // can be the warning that the program could not be fully compiled)
       const out = []
       if (output.trim() !== '')
         out.push(toHtml(output.trimEnd()))
-      for (const e of errors)
-        out.push(toHtml(e.trimEnd(), 'text-red-500'))
       if (status === 'success')
         out.push({ text: 'Success.', class: 'text-green-500' })
       else if (status === 'failure')
         out.push({ text: 'Failure.', class: 'text-orange-500' })
       else
         out.push({ text: 'Error.', class: 'text-red-500' })
+      for (const e of errors)
+        out.push(toHtml(e.trimEnd(), 'text-red-500'))
       return out
     },
   }

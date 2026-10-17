@@ -8,10 +8,11 @@
  * Monaco markers; hovering asks the server for the type of what is under the
  * mouse.
  *
- * The code between the comments % hidden and % hidden-end (on lines of
+ * The code between the comments % hidden: and % hidden-end (on lines of
  * their own) is folded when the editor opens: the editor, the server and the
  * runner have the whole code, the slide shows the rest. The line of
- * % hidden stays visible, e.g. % hidden: the facts.
+ * % hidden: stays visible, with what follows the colon, e.g.
+ * % hidden: the facts.
  */
 
 import type { Diagnostic } from './elpi-lsp'
@@ -68,8 +69,8 @@ function setupElpi(monaco: Monaco) {
   monaco.editor.getModels().forEach(track)
   monaco.editor.onDidCreateModel(track)
 
-  // folding: the ranges between % hidden and % hidden-end (they can nest)
-  const begin = /^\s*%\s*hidden(?![\w-])/
+  // folding: the ranges between % hidden: and % hidden-end (they can nest)
+  const begin = /^\s*%\s*hidden:/
   const end = /^\s*%\s*hidden-end\b/
   monaco.languages.registerFoldingRangeProvider('elpi', {
     provideFoldingRanges(model) {
@@ -115,10 +116,11 @@ function setupElpi(monaco: Monaco) {
   // hover: the type of the symbol under the mouse
   monaco.languages.registerHoverProvider('elpi', {
     async provideHover(model, position) {
+      // no hover if the server fails to answer
       const hover = await lsp.request('textDocument/hover', {
         textDocument: { uri: model.uri.toString() },
         position: { line: position.lineNumber - 1, character: position.column - 1 },
-      })
+      }).catch(() => null)
       if (!hover)
         return null
       const contents = (Array.isArray(hover.contents) ? hover.contents : [hover.contents])

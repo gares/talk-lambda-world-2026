@@ -6,12 +6,13 @@
  * in a web worker; it speaks LSP (JSON-RPC) with postMessage. It is built in
  * the elpi repository by `make build-lsp-web` (lsp/elpi-lsp-web.js).
  * Besides the standard LSP requests it answers
- *   elpi/run { text | textDocument: { uri }, query, maxSteps? }
+ *   elpi/run { textDocument: { uri }, text?, query, maxSteps? }
  *     -> { status: 'success' | 'failure' | 'error', output,
  *          errors: string[], diagnostics: string[] }
  * where diagnostics are the errors and warnings of the program (the ones
  * underlined in the editor) and errors the ones of the query and of its run
  * (running out of steps is a failure with the error "no more steps").
+ * A request that the server answers with an error is rejected.
  */
 
 export interface Diagnostic {
@@ -29,7 +30,8 @@ export interface RunResult {
 
 class ElpiLsp {
   private worker: Worker
-  private pending = new Map<number, (result: any) => void>()
+  // the requests waiting for their response
+  private pending = new Map<number, { resolve: (result: any) => void, reject: (error: Error) => void }>()
   private nextId = 1
   private ready: Promise<void>
   onDiagnostics: (uri: string, diagnostics: Diagnostic[]) => void = () => {}
@@ -38,14 +40,26 @@ class ElpiLsp {
     this.worker = new Worker(`${import.meta.env.BASE_URL}elpi-lsp-web.js`)
     this.worker.onmessage = ({ data }) => {
       if (data.id !== undefined && this.pending.has(data.id)) {
-        this.pending.get(data.id)!(data.result)
+        const { resolve, reject } = this.pending.get(data.id)!
         this.pending.delete(data.id)
+        // an error response (e.g. invalid parameters, an exception of the
+        // server) rejects the request with its message
+        if (data.error)
+          reject(new Error(data.error.message ?? 'error of the language server'))
+        else
+          resolve(data.result)
       }
       else if (data.method === 'textDocument/publishDiagnostics') {
         this.onDiagnostics(data.params.uri, data.params.diagnostics)
       }
     }
-    this.worker.onerror = e => console.error('[elpi-lsp]', e.message)
+    // the server died: the requests waiting for a response fail
+    this.worker.onerror = (e) => {
+      console.error('[elpi-lsp]', e.message)
+      for (const { reject } of this.pending.values())
+        reject(new Error(`the language server failed: ${e.message}`))
+      this.pending.clear()
+    }
     this.ready = this.send('initialize', {
       processId: null,
       rootUri: null,
@@ -59,9 +73,9 @@ class ElpiLsp {
   }
 
   private send(method: string, params: object): Promise<any> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const id = this.nextId++
-      this.pending.set(id, resolve)
+      this.pending.set(id, { resolve, reject })
       this.post({ id, method, params })
     })
   }
@@ -71,8 +85,10 @@ class ElpiLsp {
     return this.send(method, params)
   }
 
+  // a notification has no answer: if the server could not be initialized, it
+  // is dropped (the requests report the failure)
   async notify(method: string, params: object) {
-    await this.ready
+    try { await this.ready } catch { return }
     this.post({ method, params })
   }
 
@@ -89,9 +105,10 @@ class ElpiLsp {
   }
 
   // runs `query` in the program `text`, for at most `maxSteps` steps
-  // (a loop stops in about a second with the default)
+  // (a loop stops in about a second with the default); the slides have no
+  // files: the text is said to be in a directory, /slides/
   run(text: string, { query = 'main', maxSteps = 1_000_000 } = {}): Promise<RunResult> {
-    return this.request('elpi/run', { text, query, maxSteps })
+    return this.request('elpi/run', { textDocument: { uri: 'file:///slides/' }, text, query, maxSteps })
   }
 }
 

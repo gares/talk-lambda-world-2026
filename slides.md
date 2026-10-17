@@ -122,12 +122,21 @@ class: lw bg-grid lw-summary
 
 1. The Elpi programming language
    - logic programming
+     - syntax, unif, rules; age two ways
+     - backtrack
+     - findall
    - binders H.O.A.S. style
+     - F, beta, function space
+     - lambda
    - Hello World: a type checker for $\lambda_\to$
+     - run, explain
+     - constraints
 2. Interfacing Elpi with OCaml
    - the `Conversion.t` data type
    - the `ffi` GADT
    - autmatic glue code: `ppx_elpi`
+3. Again on ext lang
+   - user #1
 
 
 
