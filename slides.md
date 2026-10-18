@@ -178,21 +178,29 @@ timeline:
       - { name: Claudio Sacerdoti Coen, img: /avatars/sacerdot.jpg }
 ---
 
-# History
+# History of Elpi
 
 <Timeline :items="$frontmatter.timeline" />
 
-<div class="lw-credit">Photos: Robinson by D. Monniaux (CC BY-SA 3.0), Colmerauer by Alaindavid2 (CC BY-SA 4.0), Kowalski by Yongyuth (CC BY 3.0), Wikimedia Commons; Warren: academia.edu; Miller: researchr.org; Nadathur: his homepage</div>
+<div class="lw-credit">Photos: Robinson by D. Monniaux (CC BY-SA 3.0), Colmerauer by Alaindavid2 (CC BY-SA 4.0), Kowalski by Yongyuth (CC BY 3.0), Wikimedia Commons; Warren: academia.edu; Miller: researchr.org; Nadathur: his homepage -- Discalimer: This history is very partial; moreover all these guys are much smarter than me and Elpi would not even exist without their work.</div>
 
 ---
 layout: lw-default
 class: lw lw-run-side
 ---
 
-# Logic Programming
+# Logic Programming: unification and backtracking
 
-<<< @/snippets/logicp.elpi elpi {monaco-run}
+<<< @/snippets/unif_backtrack.elpi elpi {monaco-run}
 
+---
+layout: lw-default
+class: lw lw-run-side
+---
+
+# Logic Programming: rules
+
+<<< @/snippets/rules.elpi elpi {monaco-run}
 
 ---
 layout: lw-default

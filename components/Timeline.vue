@@ -135,8 +135,8 @@ const initials = (name: string) => {
 }
 .tl-down .tl-short { bottom: auto; top: calc(50% + .8rem); }
 /* the cards leave a band around the axis to the years and short labels */
-.tl-up .tl-card { bottom: calc(50% + 3.1rem); }
-.tl-down .tl-card { top: calc(50% + 3.1rem); }
+.tl-up .tl-card { bottom: calc(50% + 4.6rem); }
+.tl-down .tl-card { top: calc(50% + 4.6rem); }
 .tl-faces { display: flex; gap: .3rem; }
 .tl-face {
   width: 4.4rem; height: 4.4rem;

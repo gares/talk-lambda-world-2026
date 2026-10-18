@@ -1,0 +1,11 @@
+data tree A.
+symb leaf : tree A.
+symb node : A -> tree A -> tree A -> tree A.
+
+func depth tree A -> int.
+depth leaf 0.
+depth (node _ L R) N :-
+  depth L N1, depth R N2, N is N1 + N2.
+
+main :- depth T 0.
+main :- depth (node 1 (node 2 leaf leaf) leaf) D, print D.
