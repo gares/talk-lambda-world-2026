@@ -581,14 +581,13 @@ level: 2
 
 <br/>
 
-## Extension language
+## Extension languages
   - Use a language (ony) when it is a good fit
-  -
+  - Niche language? Not a problem in 2026
   
-## Rule-based is a good fit for
-  - HOAS (binders and local context)
-  - prover logical environment (global context)
-  - (meta) meta programming (homoiconicity)
+## Elpi is a good fit for
+  - Syntax with binders
+  - OCaml ecosystem
 
 
 ---
@@ -675,6 +674,7 @@ Pedro Abreu, Yves Bertot, Frederic Besson, Rob Blanco, Simon Boulier, Luc Chabas
 layout: lw-end
 level: 2
 title: Thanks
+class: lw bg-grid
 ---
 
 # Thanks for listening! {style="text-align:center"}
@@ -694,7 +694,7 @@ title: Thanks
 
 <div class="lw-end-event">
 <img src="/lw/logos-3.png" alt="Lambda World, WeyWeyWeb, On the Beach" class="h-10 inline-block" />
-&nbsp; Lambda World · Torremolinos, Málaga · 29–30 October 2026
+&nbsp; Lambda World · Málaga · 30 October 2026
 </div>
 
 </div>
