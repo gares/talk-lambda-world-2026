@@ -3,9 +3,11 @@ symb app : tm -> tm -> tm.
 symb lam : (tm -> tm) -> tm.
 
 main :- F = (x\x), F 1 = 1.
-main :- F = (x\x + 1), F 1 = 2. % its syntax
-main :- F = (x\x + 1), R is F 1, R = 2. % its syntax
-main :- Fst = (lam x\ lam y\ x), print Fst.
+% hidden: examples
+%main :- F = (x\x + 1), F 1 = 2. % its syntax
+%main :- F = (x\x + 1), R is F 1, R = 2. % its syntax
+%main :- Fst = (lam x\ lam y\ x), print Fst.
+% hidden-end
 
 symb c : tm. % dummy
 
@@ -17,4 +19,8 @@ depth (lam F) N :-
   N is N1 + 1.
 depth c 0.
 
-main :- depth (lam x\ lam y\ app x y) N, print N.
+% hidden: examples
+%main :-
+%  depth (lam x\ lam y\ app x y) N,
+%  print N.
+% hidden-end

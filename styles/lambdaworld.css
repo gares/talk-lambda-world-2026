@@ -24,7 +24,7 @@
   --lw-fg-muted: #ddd;
   --lw-h1: var(--lw-yellow);
   --lw-h2: var(--lw-orange);
-  --lw-h3: #fff;
+  --lw-h3: var(--lw-orange);
   --lw-title-stroke: transparent;
   --lw-link: var(--lw-yellow);
   --lw-rule: #444;
@@ -63,7 +63,7 @@ html:not(.dark) .slidev-layout.lw {
   --lw-fg: #111;
   --lw-fg-muted: #333;
   --lw-h2: #d97800;
-  --lw-h3: #111;
+  --lw-h3: #d97800;
   --lw-title-stroke: #000;           /* yellow titles get a black outline */
   --lw-link: #b07a00;
   --lw-rule: #ccc;

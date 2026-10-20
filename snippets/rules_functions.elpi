@@ -7,7 +7,9 @@ depth leaf 0.
 depth (node _ L R) N :-
   depth L N1, depth R N2, N is N1 + N2.
 
-main :- depth (node 1 (node 2 leaf leaf) leaf) D, print D.
+main :-
+  depth (node 1 (node 2 leaf leaf) leaf) D,
+  print D.
 % hidden: examples
 %main :- depth T_ 0.
 % hidden-end

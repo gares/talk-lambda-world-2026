@@ -41,7 +41,7 @@ hideInToc: true
 <h2 style="text-align:center">Syntax trees with binders made easy
 <br/>
 <br/>
-<span style="font-size: 0.8em">the <span class="chip">Elpi</span> programming language</span></h2>
+<span style="font-size: 0.8em">the <span class="chip"><ElpiLogo /></span> programming language</span></h2>
 
 <div style="text-align: right">
 <br/>
@@ -139,7 +139,7 @@ timeline:
 
 ---
 layout: lw-default
-class: lw lw-run-side
+class: lw lw-run-side bg-strokes
 level: 2
 ---
 
@@ -149,7 +149,7 @@ level: 2
 
 ---
 layout: lw-default
-class: lw lw-run-side
+class: lw lw-run-side bg-strokes
 level: 2
 ---
 
@@ -159,7 +159,7 @@ level: 2
 
 ---
 layout: lw-default
-class: lw lw-run-side
+class: lw lw-run-side bg-strokes
 level: 2
 ---
 
@@ -234,7 +234,7 @@ Failure.
 
 ---
 layout: lw-default
-class: lw lw-run-side
+class: lw lw-run-side bg-strokes
 level: 2
 ---
 
@@ -245,7 +245,7 @@ level: 2
 
 ---
 layout: lw-default
-class: lw lw-run-side
+class: lw lw-run-side bg-strokes
 level: 2
 ---
 
@@ -256,11 +256,15 @@ level: 2
 
 ---
 layout: lw-default
-class: lw lw-run-side
+class: lw lw-run-side bg-strokes
 level: 2
 ---
 
-# Spilling and Functional syntax
+# Spilling relations: Functional syntax
+
+<br/>
+
+### Relation → function
 
 ```elpi {monaco-run}
 func std.rev list A -> list A.
@@ -271,35 +275,18 @@ main :-
   print LP.
 ```
 
-```elpi {monaco}
-func map (func A -> B), list A -> list B.
-map _ [] [].
-map F [X|XS] [Y|YS] :- F X Y, map F XS YS.
-```
+<br/>
 
-```elpi {monaco}
+### Function → relation
+
+```elpi {monaco-run}
 func map (func A -> B), list A -> list B.
 map _ [] -> [].
 map F [X|XS] -> [F X|map F XS].
-```
 
----
-layout: lw-default
-level: 2
----
-
-# What is `==>` really
-
-```elpi
-func copy tm -> tm.
-copy (const S) (const S).
-copy (app H A) (app H1 A1) :-
-  copy H H1, copy A A1.
-copy (lam F) (lam F1) :-
-  pi x\ copy x x ==> copy (F x) (F1 x).
-
-main :- 
-  copy (app (const "rev" (app (const "rev") L)))
+main :-
+  map (x\r\ r is x + 1) [1,2,3] L,
+  print L.
 ```
 
 ---
@@ -420,7 +407,7 @@ level: 2
 # the FFI by examples
 
 ```ocaml
-type t = Pred : name * ffi * 'a -> t
+type t = Pred : name * 'a ffi * 'a -> t
 
 let builtin =
   MLCode (Pred ("sys.readdir",
@@ -437,7 +424,10 @@ let builtin =
 ```
 
 ```elpi {monaco-run}
-main :- sys.readdir "/foo" L (error E), print L E.
+main :- sys.readdir "." L ok, print L.
+% hidden: examples
+%main :- sys.readdir "/foo" L (error E), print L E.
+% hidden-end
 ```
 
 ---
@@ -445,7 +435,7 @@ layout: two-cols-header
 level: 2
 ---
 
-# autmatic glue code: `ppx_elpi`
+# autmatic glue code: ppx_elpi
 
 ::left::
 
@@ -499,7 +489,7 @@ open Elpi.API
 
 let parse_my_lang : string -> Ast.Term.t =
     (* parse my lang into an Elpi AST *)
-    (* call [Quotation.elpi : string -> Ast.Term.t] *)
+    Quotation.elpi : string -> Ast.Term.t
 
 let () = Quotation.set_default_quotation parse_my_lang
 ```
@@ -580,7 +570,7 @@ layout: default
 level: 2
 ---
 
-# Elpi: take home
+# take home
 
 <br/>
 

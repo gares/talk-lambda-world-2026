@@ -23,6 +23,8 @@
 -->
 
 <script setup lang="ts">
+import ElpiLogo from './ElpiLogo.vue'
+
 interface Person { name: string, img?: string, logo?: boolean }
 interface Item { year: number | string, short?: string, what: string, people: Person[] }
 
@@ -37,6 +39,10 @@ const initials = (name: string) => {
   const words = name.split(/\s+/).filter(w => /^\p{Lu}/u.test(w))
   return words.length > 1 ? words[0][0] + words[words.length - 1][0] : (words[0] ?? '?')[0]
 }
+
+// the texts with the word Elpi drawn as the ELPI wordmark: the odd parts of
+// the split are "Elpi"
+const parts = (text: string) => String(text).split(/\b(Elpi)\b/)
 </script>
 
 <template>
@@ -61,7 +67,7 @@ const initials = (name: string) => {
           {{ item.people.map(p => p.name).join(' & ') }}
         </div>
         <div class="tl-what">
-          {{ item.what }}
+          <template v-for="(t, k) in parts(item.what)" :key="k"><ElpiLogo v-if="k % 2" />{{ k % 2 ? '' : t }}</template>
         </div>
       </div>
       <div class="tl-dot" />
@@ -69,7 +75,7 @@ const initials = (name: string) => {
         {{ item.year }}
       </div>
       <div v-if="item.short" class="tl-short">
-        {{ item.short }}
+        <template v-for="(t, k) in parts(item.short)" :key="k"><ElpiLogo v-if="k % 2" />{{ k % 2 ? '' : t }}</template>
       </div>
     </div>
   </div>
