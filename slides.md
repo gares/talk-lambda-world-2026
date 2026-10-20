@@ -38,7 +38,10 @@ hideInToc: true
 # In this talk I give a gentle introduction to logic programming and how its rule-based nature makes it easy to manipulate syntax trees that contain binders or that are incomplete. I then focus on how Elpi can be used to extend an OCaml application via its foreign function interface.
 ---
 
-## Syntax trees with binders made easy<br/><span style="font-size: 0.8em">the Elpi programming language</span>
+<h2 style="text-align:center">Syntax trees with binders made easy
+<br/>
+<br/>
+<span style="font-size: 0.8em">the <span class="chip">Elpi</span> programming language</span></h2>
 
 <div style="text-align: right">
 <br/>

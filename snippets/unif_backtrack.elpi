@@ -9,13 +9,13 @@ age bob 23.
 age alice 20.
 age mallory 23.
 
-main :- print "here".
+main :- print "edit here".
 % hidden: examples
-main :- age alice N, print N. % query one way
-main :- age P 23, print P.    % query 2 ways
-main :- age P 23 = age bob 23, print P. % unification
-main :- age P 23 = age bob A, print P A. % unification
-main :- age P 23, age Q 23, not(P = Q), print P "and" Q "have the same age". % backtracking
-main :- age P 23, age Q 23, print "picked Q =" Q, not(P = Q), print P "and" Q "have the same age". % backtracking
-main :- std.findall (age _ 23) L, print L.
+%main :- age alice N, print N. % query one way
+%main :- age P 23, print P.    % query 2 ways
+%main :- age P 23 = age bob 23, print P. % unification
+%main :- age P 23 = age bob A, print P A. % unification
+%main :- age P 23, age Q 23, not(P = Q), print P "and" Q "have the same age". % backtracking
+%main :- age P 23, age Q 23, print "picked Q =" Q, not(P = Q), print P "and" Q "have the same age". % backtracking
+%main :- std.findall (age _ 23) L, print L.
 % hidden-end

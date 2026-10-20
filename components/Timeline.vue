@@ -156,7 +156,15 @@ const initials = (name: string) => {
   color: var(--lw-fg, #fff);
   font-weight: 600;
 }
-.tl-who, .tl-what { text-shadow: 0 0 4px var(--lw-bg, #000), 0 0 2px var(--lw-bg, #000); }
+/* texts on a solid box with soft edges, readable over the textures (like
+   the other texts of the deck, see styles/lambdaworld.css) */
+.tl-who, .tl-what, .tl-short, .tl-year {
+  background: var(--lw-bg, #000);
+  box-shadow: 0 0 .5em .25em var(--lw-bg, #000);
+  border-radius: .4em;
+  padding: 0 .3em;
+}
+.tl-who, .tl-what { width: fit-content; max-width: 100%; }
 .tl-who { font-size: .8rem; font-weight: 600; line-height: 1.15; color: var(--lw-fg, #fff); }
 .tl-what { font-size: .7rem; line-height: 1.2; color: var(--lw-fg-muted, #ddd); }
 </style>
