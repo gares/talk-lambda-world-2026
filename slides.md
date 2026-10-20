@@ -57,62 +57,6 @@ First of all thanks the orga
 layout: lw-default
 level: 2
 hideInToc: true
----
-
-# One language to rule them all!
-
-<div class="h-full flex items-center justify-center">
-  <img src="/One_Ring_Blender_Render.png" alt="The One Ring" class="max-h-100 object-contain" />
-</div>
-
-<div class="lw-credit">Par Peter J. Yost — Travail personnel, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=98351026">https://commons.wikimedia.org/w/index.php?curid=98351026</a></div>
-
----
-layout: lw-default
-level: 2
-hideInToc: true
----
-
-# Nope, two is better than one!
-
-<div class="h-full flex items-center justify-center gap-16">
-  <img src="/One_Ring_Blender_Render.png" alt="The One Ring" class="max-h-90 object-contain" />
-  <img src="/One_Ring_Blender_Render2.png" alt="The One Ring" class="max-h-90 object-contain" />
-</div>
-
-<div class="lw-credit">Par Peter J. Yost — Travail personnel, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=98351026">https://commons.wikimedia.org/w/index.php?curid=98351026</a></div>
-
----
-layout: lw-default
-level: 2
-hideInToc: true
----
-
-<div class="grid grid-cols-2 gap-12 h-full items-center text-center">
-<div>
-
-## OCaml
-
-<div class="h-48 mt-6 flex items-center justify-center">
-  <img src="/ocaml-logo.svg" alt="OCaml logo" class="on-white h-24" />
-</div>
-
-</div>
-<div>
-
-## Elpi
-
-<div class="h-48 mt-6 flex items-center justify-center">
-  <img src="/rocq-elpi-logo.png" alt="Elpi logo" class="on-white h-40" />
-</div>
-
-</div>
-</div>
-
----
-layout: lw-default
-level: 2
-hideInToc: true
 title: Summary
 class: lw bg-grid lw-summary
 ---
@@ -139,9 +83,15 @@ class: lw bg-grid lw-summary
    - user #1
 
 
+---
+layout: lw-section
+---
+
+# Elpi 101
 
 ---
 layout: lw-default
+level: 2
 timeline:
   - year: 1965
     short: Unification
@@ -178,7 +128,7 @@ timeline:
       - { name: Claudio Sacerdoti Coen, img: /avatars/sacerdot.jpg }
 ---
 
-# History of Elpi
+# A bit of history
 
 <Timeline :items="$frontmatter.timeline" />
 
@@ -187,30 +137,33 @@ timeline:
 ---
 layout: lw-default
 class: lw lw-run-side
+level: 2
 ---
 
-# Logic Programming: unification and backtracking
+# Unification and backtracking
 
 <<< @/snippets/unif_backtrack.elpi elpi {monaco-run}
 
 ---
 layout: lw-default
 class: lw lw-run-side
+level: 2
 ---
 
-# Logic Programming: rules
+# Rules and functions
 
-<<< @/snippets/rules.elpi elpi {monaco-run}
+<<< @/snippets/rules_functions.elpi elpi {monaco-run}
 
 ---
 layout: lw-default
+class: lw lw-run-side
+level: 2
 ---
 
-# binders in HOAS
+# Syntax with binders
 
-```elpi
+<<< @/snippets/hoas.elpi elpi {monaco-run}
 
-```
 
 ---
 layout: two-cols-header
@@ -223,7 +176,7 @@ level: 2
 
 Simply typed $\lambda$-calculus in $\lambda$-tree syntax (HOAS)
 
-<<< @/snippets/stlc.elpi#types elpi
+<<< @/snippets/stlc.elpi#symbs elpi
 
 Typing
 
@@ -247,29 +200,29 @@ Typing
 ````md magic-move {at:1}
 
 ```elpi
-goal> of (lam x\ lam y\ x) TyFst.
+main :- of (lam x\ lam y\ x) TyFst.
 ```
 
 ```elpi
-goal> of (lam x\ lam y\ x) (arr S0 T0).
-goal> of        (lam y\ c) T0.
+main :- of (lam x\ lam y\ x) (arr S0 T0).
+main :- of        (lam y\ c) T0.
 ```
 
 ```elpi
-goal> of (lam x\ lam y\ x) (arr S0 (arr S1 T1)).
-goal> of        (lam y\ c) (arr S1 T1).
-goal> of                c  T1.
+main :- of (lam x\ lam y\ x) (arr S0 (arr S1 T1)).
+main :- of        (lam y\ c) (arr S1 T1).
+main :- of                c  T1.
 ```
 
 ```elpi
-goal> of (lam x\ lam y\ x) TyFst.
+main :- of (lam x\ lam y\ x) TyFst.
 
 Success:
   TyFst = arr S0 (arr S1 S0)
 ```
 
 ```elpi
-goal> of (app H A) T.
+main :- of (app H A) T.
 
 Failure.
 ```
@@ -277,100 +230,160 @@ Failure.
 ````
 
 ---
-layout: two-cols-header
+layout: lw-default
+class: lw lw-run-side
+level: 2
+---
+
+# Elpi = <span class="normal-case">$\lambda$Prolog</span> + C..
+
+
+<<< @/snippets/stlc_delay.elpi elpi {monaco-run}
+
+---
+layout: lw-default
+class: lw lw-run-side
 level: 2
 ---
 
 # Elpi = <span class="normal-case">$\lambda$Prolog</span> + CHR
 
-::left::
 
-Typing (as before)
-
-<<< @/snippets/stlc.elpi#of elpi
-
-Holes & constraints
-
-<<< @/snippets/stlc.elpi#cst elpi
-
-<v-click at="6">
-Constraint Handling Rules
-
-<<< @/snippets/stlc.elpi#chr elpi
-</v-click>
-
-<br/>
-<br/>
-<br/>
-
-
-::right::
-
-````md magic-move
-```elpi
-goal> of (app H A) T.
-```
-
-```elpi
-goal> of (app H A) T.
-
-Success:
-
-Constraints:
-  of A S  /* suspended on A */
-  of H (arr S T)  /* suspended on H */
-```
-
-```elpi
-goal> of (app H A) T, H = (lam x\ x).
-
-Success:
-
-Constraints:
-  of A T  /* suspended on A */
-```
-
-```elpi
-goal> of (app (lam x\ x) A) T.
-
-Success:
-
-Constraints:
-  of A T  /* suspended on A */
-```
-
-```elpi
-goal> of (app D D) T.
-```
-
-```elpi
-goal> of (app D D) T.
-
-Success:
-
-Constraints:
-  of D S  /* suspended on D */
-  of D (arr S T)  /* suspended on D */
-```
-
-```elpi
-goal> of (app D D) T.
-
-Failure
-```
-````
-
----
-layout: lw-section
----
-
-# Interfacing Elpi with OCaml
+<<< @/snippets/stlc_delay_chr.elpi elpi {monaco-run}
 
 ---
 layout: lw-default
+class: lw lw-run-side
+level: 2
 ---
 
-# Conversion
+# Spilling and Functional syntax
+
+```elpi {monaco-run}
+func std.rev list A -> list A.
+main :-
+  L = [1,2,3],
+  std.rev L RL,
+  std.append L RL LP,
+  print LP.
+```
+
+```elpi {monaco}
+func map (func A -> B), list A -> list B.
+map _ [] [].
+map F [X|XS] [Y|YS] :- F X Y, map F XS YS.
+```
+
+```elpi {monaco}
+func map (func A -> B), list A -> list B.
+map _ [] -> [].
+map F [X|XS] -> [F X|map F XS].
+```
+
+---
+layout: lw-default
+level: 2
+---
+
+# What is `==>` really
+
+```elpi
+func copy tm -> tm.
+copy (const S) (const S).
+copy (app H A) (app H1 A1) :-
+  copy H H1, copy A A1.
+copy (lam F) (lam F1) :-
+  pi x\ copy x x ==> copy (F x) (F1 x).
+
+main :- 
+  copy (app (const "rev" (app (const "rev") L)))
+```
+
+---
+layout: lw-default
+level: 1
+---
+
+# One language to rule them all?
+
+<div class="h-full flex items-center justify-center">
+  <img src="/One_Ring_Blender_Render.png" alt="The One Ring" class="max-h-100 object-contain" />
+</div>
+
+<div class="lw-credit">Par Peter J. Yost — Travail personnel, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=98351026">https://commons.wikimedia.org/w/index.php?curid=98351026</a></div>
+
+---
+layout: lw-default
+level: 2
+hideInToc: true
+---
+
+# Nope, two is better than one!
+
+<div class="h-full flex items-center justify-center gap-16">
+  <img src="/One_Ring_Blender_Render.png" alt="The One Ring" class="max-h-90 object-contain" />
+  <img src="/One_Ring_Blender_Render2.png" alt="The One Ring" class="max-h-90 object-contain" />
+</div>
+
+<div class="lw-credit">Par Peter J. Yost — Travail personnel, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/w/index.php?curid=98351026">https://commons.wikimedia.org/w/index.php?curid=98351026</a></div>
+
+---
+layout: lw-default
+level: 2
+hideInToc: true
+---
+
+# strengths add up, weaknesses cancel out
+
+<div class="grid grid-cols-2 gap-12 mt-6 text-center">
+<div>
+
+<div class="h-32 flex items-center justify-center">
+  <img src="/ocaml-logo.svg" alt="OCaml logo" class="on-white h-24" />
+</div>
+
+<div class="pros">
+
+- speed
+- large codebase
+
+</div>
+<div class="cons">
+
+- binders
+- incomplete terms
+
+</div>
+
+</div>
+<div>
+
+<div class="h-32 flex items-center justify-center">
+  <img src="/elpi-icon2-black.png" alt="Elpi logo" class="on-white h-24" style="padding: 1.6rem 1.2rem" />
+</div>
+
+<div class="cons">
+
+- interpreter
+- tiny language
+
+</div>
+<div class="pros">
+
+- high level
+- HOAS
+
+</div>
+
+</div>
+</div>
+
+---
+layout: lw-default
+level: 2
+---
+
+# There and Back again
 
 ```ocaml
 module Conversion : sig
@@ -381,7 +394,10 @@ module Conversion : sig
     embed : 'a embedding;   (* 'a -> term *)
     readback : 'a readback; (* term -> 'a *)
   }
+end
+```
 
+```ocaml
 module BuiltInData : sig
   val int    : int Conversion.t
   val float  : float Conversion.t
@@ -389,22 +405,19 @@ module BuiltInData : sig
   val list   : 'a Conversion.t -> 'a list Conversion.t
   type diagnostic = OK | ERROR of string
   val diagnostic : diagnostic API.Conversion.t
-
+end
 ```
 
 ---
 layout: lw-default
+class: lw lw-run-side
+level: 2
 ---
 
-# the `ffi` GADT
+# the FFI by examples
 
 ```ocaml
-type ('function_type, 'inernal_outtype_in, 'internal_hyps, 'internal_constraints) ffi =
-    | In    : 't Conversion.t * doc * ('i, 'o,'h,'c) ffi -> ('t -> 'i,'o,'h,'c) ffi
-    | Out   : 't Conversion.t * doc * ('i, 'o * 't option,'h,'c) ffi -> ('t -> 'i,'o,'h,'c) ffi
-    | Easy : doc -> (depth:int -> 'o, 'o, unit, unit) ffi
-
-type t = Pred : name * ('a,unit,'h,'c) ffi * 'a -> t
+type t = Pred : name * ffi * 'a -> t
 
 let builtin =
   MLCode (Pred ("sys.readdir",
@@ -420,8 +433,13 @@ let builtin =
 
 ```
 
+```elpi {monaco-run}
+main :- sys.readdir "/foo" L (error E), print L E.
+```
+
 ---
 layout: two-cols-header
+level: 2
 ---
 
 # autmatic glue code: `ppx_elpi`
@@ -442,762 +460,111 @@ type term =
   | Lam of { name : string;
              ty : ty;
              body : (term[@elpi.binder "term" tctx
-                        (fun name ty -> CtxEntry (name, ty))]) }
+                            (fun name ty ->
+                               CtxEntry (name, ty))]) }
 [@@deriving elpi]
 ```
 
 ::right::
 
-```elpi {monaco}
-builtin data ty.
-builtin symb arr : ty -> ty -> ty = "0".  % Arr
-builtin symb int : ty = "0".  % Int
+```elpi
+data ty.
+symb arr : ty -> ty -> ty.  % Arr
+symb int : ty.  % Int
 
-builtin func ctxentry term -> string, ty.
+func ctxentry term -> string, ty.
 
 
-builtin data term.
-builtin symb app : term -> term -> term = "0".  % App
-builtin symb lam : string -> ty -> (term -> term) -> term = "0".  % Lam
+data term.
+symb app : term -> term -> term.  % App
+symb lam : string -> ty -> (term -> term) -> term.  % Lam
 
 
 ```
 
 ---
-layout: lw-section
+layout: two-cols-header
+level: 2
+---
+
+# Quotations
+
+::left::
+
+```ocaml
+open Elpi.API
+
+let parse_my_lang : string -> Ast.Term.t =
+    (* parse my lang into an Elpi AST *)
+    (* call [Quotation.elpi : string -> Ast.Term.t] *)
+
+let () = Quotation.set_default_quotation parse_my_lang
+```
+
+<br/>
+
+```elpi
+main :-
+  F = {{ fun (x : int) (y : {{ T }}) -> x }},
+  %     ....my_lang......... elpi  .......
+  T = {{ int }},
+  print "The term F is:" F.
+```
+
+::right::
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+```
+The term F is: lam int x\ lam int y\ x
+```
+
+---
+layout: two-cols-header
+level: 1
 ---
 
 # The integration in Rocq
 
+[Rocq]{.chip} programs, specs and proofs in one language: written in [OCaml]{.chip} extended in [Elpi]{.chip}
 
----
-layout: image-right
-image: readme.png
-backgroundSize: 80%
-transition: fade
-level: 2
----
+<style>
+h2 { margin: .8rem 0 .2rem; }
+li { margin-bottom: .1em; }
+.slidev-code { margin: .3rem 0 !important; }
+</style>
 
-# Notable features
+::left::
 
-- HOAS for Gallina
-- quotations and anti-quotations
-
-  ![Quotations](/quote.png "quote")
-
-- Databases of rules
-- Extensive API
-
-  ![API example](/api.png "api")
-
-
----
-layout: two-cols-header
-transition: fade
-level: 2
----
-
-# Integration with Rocq: from Prop to bool (1/3)
-
-:: left ::
-
-````md magic-move
+## Derive
 
 ```coq
-Inductive is_even : nat -> Prop := ...
-
-Fixpoint even (n : nat) : bool := ...
-
-Lemma evenP n : reflect (is_even n) (even n).
-
-
-Lemma andP  {P Q : Prop} {p q : bool} :
-  reflect P p -> reflect Q q ->
-    reflect (P /\ Q) (p && q).
-
-
-Lemma elimT {P b} : reflect P b -> b = true -> P.
-
-Lemma test : is_even 6 /\ is_even 4.
-Proof.
-  refine (elimT (andP (evenP 6) (evenP 4)) _).
-
-
-  (* even 6 && even 4 = true *)
-  simpl. trivial.
-Qed.
-```
-
-```coq
-Inductive is_even : nat -> Prop := ...
-
-Fixpoint even (n : nat) : bool := ...
-
-Lemma evenP n : reflect (is_even n) (even n).
-
-
-Lemma andP  {P Q : Prop} {p q : bool} :
-  reflect P p -> reflect Q q ->
-    reflect (P /\ Q) (p && q).
-
-
-Lemma elimT {P b} : reflect P b -> b = true -> P.
-
-Lemma test : is_even 6 /\ is_even 4.
-Proof.
-  (* refine (elimT (andP (evenP 6) (evenP 4)) _). *)
-  to_bool.
-
-  (* even 6 && even 4 = true *)
-  simpl. trivial.
-Qed.
-```
-
-````
-
-:: right ::
-
----
-layout: two-cols-header
-transition: fade
-level: 2
----
-
-# Integration with Rocq: from Prop to bool (2/3)
-
-:: left ::
-
-```coq
-Inductive is_even : nat -> Prop := ...
-
-Fixpoint even (n : nat) : bool := ...
-
-Lemma evenP n : reflect (is_even n) (even n).
-
-
-Lemma andP  {P Q : Prop} {p q : bool} :
-  reflect P p -> reflect Q q ->
-    reflect (P /\ Q) (p && q).
-
-
-Lemma elimT {P b} : reflect P b -> b = true -> P.
-
-Lemma test : is_even 6 /\ is_even 4.
-Proof.
-  (* refine (elimT (andP (evenP 6) (evenP 4)) _). *)
-  to_bool.
-
-  (* even 6 && even 4 = true *)
-  simpl. trivial.
-Qed.
-```
-
-:: right ::
-
-```coq
-(* [tb P R] finds R : reflect P _ *)
-Elpi Tactic to_bool.
-Elpi Accumulate lp:{{
-  func tb term -> term.
-  tb {{ is_even lp:N }} {{ evenP lp:N }}.
-  tb {{ lp:P /\ lp:Q }} {{ andP lp:PP lp:QQ }} :- tb P PP, tb Q QQ.
-
-  solve (goal _ _ Ty _ _ as G) GL :-
-    tb Ty P, refine {{ elimT lp:P _ }} G GL.              }}.
-```
-
-
----
-layout: two-cols-header
-transition: fade
-level: 2
----
-
-# Integration with Rocq: from Prop to bool (3/3)
-
-:: left ::
-
-```coq
-Inductive is_even : nat -> Prop := ...
-Fixpoint even (n : nat) : bool := ...
-
-Lemma evenP n : reflect (is_even n) (even n).
-Register evenP.
-(* tb {{ is_even lp:N }} {{ evenP lp:N }} *)
-
-Lemma andP  {P Q : Prop} {p q : bool} :
-  reflect P p -> reflect Q q ->
-    reflect (P /\ Q) (p && q).
-Register andP.
-(* tb {{ lp:P /\ lp:Q }} {{ andP lp:PP lp:QQ }} :- 
-     tb P PP, tb Q QQ. *)
-
-Lemma elimT {P b} : reflect P b -> b = true -> P.
-Lemma test : is_even 6 /\ is_even 4.
-Proof.
-  (* refine (elimT (andP (evenP 6) (evenP 4)) _). *)
-  to_bool.
-
-  (* even 6 && even 4 = true *)
-  simpl. trivial.
-Qed.
-```
-
-:: right ::
-
-````md magic-move
-
-```coq
-(* [tb P R] finds R : reflect P _ *)
-Elpi Db tb.db lp:{{ func tb term -> term. }}.
-
-Elpi Tactic to_bool.
-Elpi Accumulate Db tb.db.
-Elpi Accumulate lp:{{
-  solve (goal _ _ Ty _ _ as G) GL :-
-    tb Ty P, refine {{ elimT lp:P _ }} G GL.              }}.
-
-Elpi Command Register.
-Elpi Accumulate Db tb.db.
-Elpi Accumulate lp:{{
-  func compile term, term, list prop -> prop.
-
-  main [str S] :-
-    coq.locate S GR,
-    coq.env.typeof GR Ty,
-    compile Ty (global GR) [] C,
-    coq.elpi.accumulate _ "tb.db" (clause _ _ C).        }}.
-
-```
-
-```elpi
-% [compile Ty R Hyps C] invariant R : Ty
-func compile term, term, list prop -> prop.
-
-compile {{ reflect lp:P _ }} R Todo (tb P R :- Todo).
-
-compile {{ reflect lp:S _ -> lp:Ty }} R Todo (pi h\ C h) :- !,
-  pi h\ compile Ty {{ lp:R lp:h }} [tb S h|Todo] (C h).
-
-compile {{ forall x, lp:(Ty x) }} R Todo (pi x\ C x) :-
-  pi x\ compile (Ty x) {{ lp:R lp:x }} Todo (C x).
-```
-
-```elpi
-% [compile Ty R Hyps C] invariant R : Ty
-func compile term, term, list prop -> prop.
-
-compile {{ reflect lp:P _ }} R Todo (tb P R :- Todo).
-
-compile {{ reflect lp:S _ -> lp:Ty }} R Todo (pi h\ C h) :- !,
-  pi h\ compile Ty {{ lp:R lp:h }} [tb S h|Todo] (C h).
-
-compile {{ forall x, lp:(Ty x) }} R Todo (pi x\ C x) :-
-  pi x\ compile (Ty x) {{ lp:R lp:x }} Todo (C x).
-
-% compile {{ forall n, reflect (is_even n) (even n) }} {{ evenP }} []
-%   (pi n\ tb {{ is_even lp:n }} {{ evenP lp:n }} :- [])
-```
-
-```elpi
-% [compile Ty R Hyps C] invariant R : Ty
-func compile term, term, list prop -> prop.
-
-compile {{ reflect lp:P _ }} R Todo (tb P R :- Todo).
-
-compile {{ reflect lp:S _ -> lp:Ty }} R Todo (pi h\ C h) :- !,
-  pi h\ compile Ty {{ lp:R lp:h }} [tb S h|Todo] (C h).
-
-compile {{ forall x, lp:(Ty x) }} R Todo (pi x\ C x) :-
-  pi x\ compile (Ty x) {{ lp:R lp:x }} Todo (C x).
-
-% compile {{ forall n, reflect (is_even n) (even n) }} {{ evenP }} []
-%   (pi n\ tb {{ is_even lp:n }} {{ evenP lp:n }} :- [])
-
-% compile {{ forall P Q p q, reflect P p -> reflect Q q ->
-%              reflect (P /\ Q) (p && q) }} {{ andP }} []
-%   (pi P Q p q PP QQ\
-%        tb {{ lp:P /\ lp:Q }} {{ andP lp:PP lp:QQ }} :-
-%           [tb Q QQ, tb P PP])
-```
-
-````
-
-
----
-layout: lw-section
----
-
-# The good company
-
-https://github.com/rocq-community/metaprogramming-rosetta-stone
-
----
-transition: fade
-zoom: 0.75
-level: 2
----
-
-# Comparison
-
-<table>
-
-<thead>
-<tr style="border-bottom-width: 4px"> <th></th> <th>Elpi</th> <th>Ltac2</th> <th>MetaRocq</th> </tr>
-</thead>
-<tbody>
-
-<tr> <td>Gallina</td>
-  <td>
-    <icon-park-twotone-pie-seven/>
-    <br/><small>no mutual fix/ind</small>
-  </td>
-  <td>
-    <icon-park-twotone-round/>
-  </td>
-  <td>
-    <icon-park-twotone-round/>
-  </td>
-</tr>
-
-<tr> <td>Bound Variables</td>
-  <td>
-    <icon-park-twotone-round/>
-  </td>
-  <td>
-    <icon-park-twotone-pie-three/>
-    <br/><small>quotations</small>
-
-  </td>
-  <td>
-    <icon-park-twotone-pie-one/>
-    <br/><small>toplevel quotation</small>
-  </td>
-</tr>
-
-<tr style="border-bottom-width: 4px"> <td>Holes</td>
-  <td>
-    <icon-park-twotone-round/>
-  </td>
-  <td>
-    <icon-park-twotone-pie-five/>
-    <br/><small>tactic monad</small>
-
-  </td>
-  <td>
-    <icon-park-twotone-pie-one/>
-    <br/><small>only AST</small>
-  </td>
-</tr>
-
-<tr> <td>Proof API</td>
-  <td>
-    <icon-park-twotone-pie-four/>
-    <br/><small>weak ltac1 bridge</small>
-  </td>
-  <td>
-    <icon-park-twotone-round/>
-    <br/><small>(sufficiently close)</small>
-  </td>
-  <td>
-    <icon-park-twotone-pie-one/>
-    <br/><small>only TC search, obligations</small>
-  </td>
-</tr>
-
-<tr style="border-bottom-width: 4px"> <td>Vernacular API</td>
-  <td>
-    <icon-park-twotone-pie-seven/>
-    <br/><small>no notations, obligations</small>
-  </td>
-  <td>
-    <material-symbols-circle-outline/>
-  </td>
-  <td>
-    <icon-park-twotone-pie-three/>
-    <br/><small>only env, obligations</small>
-  </td>
-</tr>
-
-<tr style="border-bottom-width: 4px"> <td>Elaborator API</td>
-  <td>
-    <icon-park-twotone-pie-six/>
-    <br/><small>no error locations</small>
-  </td>
-  <td>
-    <material-symbols-circle-outline/>
-  </td>
-  <td>
-    <material-symbols-circle-outline/>
-  </td>
-</tr>
-
-
-<tr style="border-bottom-width: 4px"> <td>Reasoning logic</td>
-  <td>
-    <icon-park-twotone-pie-one/>
-    <br/><small>Abella</small>
-  </td>
-  <td>
-    <material-symbols-circle-outline/>
-  </td>
-  <td>
-    <icon-park-twotone-pie-six/>
-    <br/><small>no holes, unif</small>
-  </td>
-</tr>
-
-</tbody>
-</table>
-
-To the best of my knowledge, on 1/1/2026 {style="text-align:center"}
-
-
----
-layout: lw-section
----
-
-# What makes me proud
-
-
----
-layout: two-cols-header
-level: 2
----
-
-# Hierarchy Builder
-
-<div class="authors">
-
-![CohenCyril](/avatars/CohenCyril.jpg)
-![pi8027](/avatars/pi8027.jpg)
-![gares](/avatars/gares.jpg)
-![proux01](/avatars/proux01.jpg)
-![ThomasPortet](/avatars/ThomasPortet.jpg)
-![affeldt-aist](/avatars/affeldt-aist.jpg)
-<!--
-![FissoreD](/avatars/FissoreD.jpg)
-![SkySkimmer](/avatars/SkySkimmer.jpg)
-![thery](/avatars/thery.jpg)
-![Tvallejos](/avatars/Tvallejos.jpg)
-![VojtechStep](/avatars/VojtechStep.jpg)
-![ybertot](/avatars/ybertot.jpg)
--->
-
-</div>
-
-DSL to declare a hierarchy of interfaces
-
-:: left ::
-
-* generates boilerplate via Elpi's API: modules, implicit arguments, canonical structures, ... 
-* used by the Mathematical Components library and other ~20 libraries
-* makes "packed classes" easy
-
-  ![MC](/hb_intf.png "number of interfaces"){style="width: 80%"}
-
-  2017
-  <span style="width:8em; display:inline-block"/>
-  2022
-  <span style="width:2em; display:inline-block"/>
-  2024
-
-:: right ::
-
-```coq
-From HB Require Import structures.
-
-HB.mixin Record IsAddComoid A := {
-  zero : A;
-  add : A -> A -> A;
-  addrA : forall x y z, add x (add y z) = add (add x y) z;
-  addrC : forall x y, add x y = add y x;
-  add0r : forall x, add zero x = x;
-}.
-
-HB.structure Definition AddComoid := { A of IsAddComoid A }.
-
-Notation "0" := zero.
-Infix "+" := add.
-
-Check forall (M : AddComoid.type) (x : M), x + x = 0.
-```
-
-<!--
-this is the command / this is the argument
-
-uses the APIs to declare modules, coercions, implicit arguments
-
---
-layout: two-cols-header
-level: 2
---
-
-# Trocq
-
-<div class="authors">
-
-![ecranceMERCE](/avatars/ecranceMERCE.jpg)
-![amahboubi](/avatars/amahboubi.jpg)
-![CohenCyril](/avatars/CohenCyril.jpg)
-<!-- ![palmskog](/avatars/palmskog.jpg) -- >
-
-</div>
-
-Proof transfer via parametricity (with or without univalence).
-
-:: left ::
-
-<div style="padding-right: 3em">
-
-
-- Registers in Elpi Databases translation rules
-- Synthesizes transfer proofs minimizing the axioms required
-
-</div>
-
-:: right :: 
-
-<div style="transform: scale(1.2)">
-
-```coq 
-From Trocq Require Import Trocq.
-
-Definition RN : (N <=> nat)%P := ...
-Trocq Use RN.
-
-Lemma RN0 : RN 0%N 0%nat. ...
-Lemma RNS m n : RN m n -> RN (N.succ m) (S n). ...
-Trocq Use RN0 RNS.
-
-Lemma N_Srec : ∀P : N -> Type, P 0%N ->
-    (∀n, P n -> P (N.succ n)) -> ∀n, P n.
-Proof.
-trocq. (* replaces N by nat in the goal *)
-exact nat_rect.
-Qed.
-```
-
-</div>
-
---
-layout: two-cols-header
-level: 2
---
-
-# Derive
-
-<div class="authors">
-
-![gares](/avatars/gares.jpg)
-![CohenCyril](/avatars/CohenCyril.jpg)
-![bgregoir](/avatars/bgregoir.jpg)
-![eponier](/avatars/eponier.jpg)
-![Blaisorblade](/avatars/Blaisorblade.jpg)
-![rlepigre](/avatars/rlepigre.jpg)
-![dwarfmaster](/avatars/dwarfmaster.jpg)
-<!--
-![artagnon](/avatars/artagnon.jpg)
-![ecranceMERCE](/avatars/ecranceMERCE.jpg)
-![ejgallego](/avatars/ejgallego.jpg)
-![FissoreD](/avatars/FissoreD.jpg)
-![herbelin](/avatars/herbelin.jpg)
-![jfehrle](/avatars/jfehrle.jpg)
-![maximedenes](/avatars/maximedenes.jpg)
-![pedrotst](/avatars/pedrotst.jpg)
-![phikal](/avatars/phikal.jpg)
-![pi8027](/avatars/pi8027.jpg)
-![ppedrot](/avatars/ppedrot.jpg)
-![proux01](/avatars/proux01.jpg)
-![robblanco](/avatars/robblanco.jpg)
-![SimonBoulier](/avatars/SimonBoulier.jpg)
-![SkySkimmer](/avatars/SkySkimmer.jpg)
-![Tragicus](/avatars/Tragicus.jpg)
-![vbgl](/avatars/vbgl.jpg)
-![VojtechStep](/avatars/VojtechStep.jpg)
-![wdeweijer](/avatars/wdeweijer.jpg)
-![whonore](/avatars/whonore.jpg)
-![ybertot](/avatars/ybertot.jpg)
-![yoichi-at-bedrock](/avatars/yoichi-at-bedrock.jpg)
-![Zimmi48](/avatars/Zimmi48.jpg)
-- ->
-
-</div>
-
-Framework for type driven code synthesis
-
-:: left ::
-
-<div style="padding-right: 3em">
-
-Derivations:
-- parametricity
-- deep induction
-- equality tests and proofs
-- lenses (record update syntax)
-- a few more...
-
-</div>
-
-:: right :: 
-
-<div style="transform: scale(1.2)">
-
-```coq
-From elpi.apps Require Import derive.std lens.
-
-#[only(lens_laws, eqb), module] derive
+#[only(lens_laws,map)] derive
 Record Box A := { contents : A; tag : nat }.
 
-About Box. (* Notation Box := Box.t *)
+Check box_map : (A -> B) -> Box A -> Box B.
 
-Check Box.eqb :
-  ∀A, (A -> A -> bool) -> Box A -> Box A -> bool.
+Check _tag : Lens (Box A) nat.
 
-(* the Lens for the second field *)
-Check @Box._tag : ∀A, Lens (Box A) (Box A) nat nat.
-
-(* a Lens law *)
-Check Box._tag_set_set : ∀A (r : Box A) y x,
-  set Box._tag x (set Box._tag y r) = set Box._tag x r.
+Check set_tag_twice:
+  ∀ A (r : Box A) y x,
+    set tag x (set tag y r) = set tag x r.
 ```
 
-</div>
-
-
---
-layout: two-cols-header
-level: 2
---
-
-# Algebra Tactics
-
-<div class="authors">
-
-![pi8027](/avatars/pi8027.jpg)
-![proux01](/avatars/proux01.jpg)
-![amahboubi](/avatars/amahboubi.jpg)
-<!-- ![CohenCyril](/avatars/CohenCyril.jpg)
-![gares](/avatars/gares.jpg) -- >
-
-</div>
-
-`ring`, `field`, `lra`, `nra`, and `psatz` tactics for the Mathematical Components library. 
-
-:: left ::
-
-- works with any instance of the structure: concrete, abstract and mixed
-  like `int * R` where `R` is a variable
-- automatically push down ring morphisms and additive functions to
-  leaves of the expression
-- reification up to instance unification in Elpi
-
-
-:: right ::
-
-```coq
-From mathcomp Require Import all_ssreflect.
-From mathcomp Require Import all_algebra.
-From mathcomp Require Import ring lra.
-
-Lemma test (F : realFieldType) (x y : F) :
-  x + 2 * y <= 3 ->
-  2 * x + y <= 3 ->
-    x + y <= 2.
-Proof. lra. Qed.
-
-Variables (R : unitRingType) (x1 x2 x3 y1 y2 y3 : R).
-Definition f1 : R := ...
-Definition f2 : R := ...
-Definition f3 : R := ...
-
-(* 500 lines of polynomials later... *)
-
-Lemma example_from_Sander : f1 * f2 = f3.
-Proof. rewrite /f1 /f2 /f3. ring. Qed.
-```
-
-
---
-layout: lw-section
---
-
-# Elpi in a nutshell
-
-https://github.com/LPCIC/elpi/
-
---
-layout: two-cols-header
-image: vespa.png
-backgroundSize: 80%
-level: 2
---
-
-# Rules, rules, rules!{style="text-align:center"}
-
-
-:: left ::
-
-
-## Roots
-
-- Elpi is a constraint logic programming language
-- Elpi is a dialect of λProlog and CHR
-- backtracking is not the point
+::right::
 
 <br/>
 
-## What really matters
+<img src="/rocq-elpi-logo.png" alt="Rocq-Elpi logo" class="on-white h-56 mt-6 mx-auto block" />
 
-- Code is organized in rules
-- Rule application is guided by a pattern
-- Rules can be added statically and dynamically
-
-
-
-:: right ::
-
-## <icon-park-twotone-caution/> Vintage syntax ahead
-
-<ul>
-<li><p>variables are capitals
-<force-inline>
-```elpi
-X
-```
-</force-inline>
-</p></li>
-
-<li><p> λx.t  is written
-<force-inline>
-```elpi
-x\ t
-```
-</force-inline>
-</p></li>
-
-<li><p>rules are written
-<force-inline>
-```elpi
-goal :- subgoal1, subgoal2...
-```
-</force-inline>
-</p></li>
-
-</ul>
-
-
-
---
-layout: lw-section
-transition: fade
---
-
-# Integration in Rocq
-
-https://github.com/LPCIC/coq-elpi/
--->
-
+<div class="lw-credit">Rocq-Elpi logo by Reynald Affeldt</div>
 
 ---
 layout: lw-section
@@ -1216,6 +583,7 @@ level: 2
 
 ## Extension language
   - Use a language (ony) when it is a good fit
+  -
   
 ## Rule-based is a good fit for
   - HOAS (binders and local context)
@@ -1224,49 +592,15 @@ level: 2
 
 
 ---
-layout: default
-level: 2
----
-
-# Perspectives - Elpi takes advantage of Rocq
-
-- Mechanization of Elpi in Rocq (durability)
-  - operational semantics of $\lambda$Prolog + cut (done, by Fissore)
-  - determinacy analysis (control part done, HO part ongoing)
-  - term representation, unifier (todo and scary)
-- Mechanization of $\mathcal{G}$ in Rocq 
-  - metatheory of $\mathcal{G}$ (warming up)
-  - proofs about Elpi code in Rocq
-
-
----
-layout: default
-level: 2
----
-
-# Perspectives - Rocq takes advantage of Elpi
-
-- Rocq-Elpi into Rocq proper (use Elpi in lower layers)
-  - need HOAS encoding for mutual fixpoints (and mutual inductive types)
-  - functional (rule based) syntax could be more familiar to Rocq users
-  - user manual definitely needed
-- Memoization (tabling via SLG)
-  - no good public benchmark, but BedRock/BlueRock/SkyLabs-AI needs it
-  - loop detection could help beginners
-
----
 layout: two-cols-header
 image: logo.png
 backgroundSize: 80%
 level: 2
-title: Thanks
 ---
 
 # Thanks for contributing code! {style="text-align:center"}
 
 <div style="text-align:center">
-
-https://github.com/LPCIC/elpi/
 
 </div>
 
@@ -1275,7 +609,6 @@ https://github.com/LPCIC/elpi/
 <div class="vauthors">
 
 
-<br/>
 
 ![Armael](/avatars/Armael.jpg)
 ![artagnon](/avatars/artagnon.jpg)
@@ -1338,34 +671,6 @@ Pedro Abreu, Yves Bertot, Frederic Besson, Rob Blanco, Simon Boulier, Luc Chabas
 
 </div>
 
-
----
-layout: two-cols-header
-image: logo.png
-backgroundSize: 80%
-level: 2
-title: Thanks
----
-
-# Thanks for support and motivation! {style="text-align:center"}
-
-
-:: right ::
-
-<div class="vfamily">
-
-![anna](./public/anna.jpg){style="object-fit: contain;"}
-
-</div>
-
-:: left ::
-
-<div class="vfamily">
-
-![cinzia](./public/cinzia.jpeg){style="width: 85%"}
-
-</div>
-
 ---
 layout: lw-end
 level: 2
@@ -1373,6 +678,26 @@ title: Thanks
 ---
 
 # Thanks for listening! {style="text-align:center"}
+
+<div class="flex flex-col items-center gap-2" style="margin-top: -1.5rem">
+
+<a href="https://github.com/LPCIC/elpi/" style="border: 0"><img src="/qr-elpi.svg" alt="QR code: https://github.com/LPCIC/elpi/" class="h-56 rounded" /></a>
+
+<div class="lw-end-url">github.com/LPCIC/elpi</div>
+
+<div>
+<span class="lw-name">Enrico Tassi</span> &nbsp;&nbsp;
+<a href="https://github.com/gares" style="white-space: nowrap"><mdi-github style="vertical-align: middle"/> @gares</a>
+ &nbsp;&nbsp;
+<img src="/inria.svg" alt="Inria" style="display: inline-block; height: 1.3em; vertical-align: middle">
+</div>
+
+<div class="lw-end-event">
+<img src="/lw/logos-3.png" alt="Lambda World, WeyWeyWeb, On the Beach" class="h-10 inline-block" />
+&nbsp; Lambda World · Torremolinos, Málaga · 29–30 October 2026
+</div>
+
+</div>
 
 
 

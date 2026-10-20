@@ -203,3 +203,123 @@ html:not(.dark) .lw-logo { filter: invert(1); }
 .lw-run-side .slidev-monaco-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: stretch; }
 .lw-run-side .slidev-monaco-container > div:nth-child(2) { border-top: 0; border-left: 1px solid var(--lw-code-border); border-radius: 0; }
 .lw-run-side .slidev-runner-output { font-size: .85rem; line-height: 1.25rem; }
+/* a numbered list inside an item (e.g. the second level of <Toc/>): small
+   bullets like the sub-items, not big numbers */
+.lw.lw-summary ol ol { counter-reset: none; margin: .5rem 0 0 1.2rem; padding: 0; list-style: square; }
+.lw.lw-summary ol ol > li { counter-increment: none; padding-left: .3rem; margin-bottom: .2em; font-size: 1.3rem; font-weight: 400; line-height: 1.4; color: var(--lw-fg-muted); }
+.lw.lw-summary ol ol > li::before { content: none; }
+.lw.lw-summary ol ol > li::marker { content: normal; color: var(--lw-yellow); }
+/* the entries of <Toc/> are links: plain text here */
+.lw.lw-summary .slidev-toc a { color: inherit; border-bottom: 0; }
+/* <Toc/> lists every section: more compact than a hand-written summary */
+.lw.lw-summary .slidev-toc > ol { margin-top: 1rem; }
+.lw.lw-summary .slidev-toc ol > li { margin-bottom: .7rem; font-size: 1.5rem; padding-left: 4.5rem; }
+.lw.lw-summary .slidev-toc ol > li::before { font-size: 2.2rem; top: -.2em; }
+.lw.lw-summary .slidev-toc ol ol { margin-top: .2rem; }
+.lw.lw-summary .slidev-toc ol ol > li { margin-bottom: 0; font-size: 1rem; padding-left: .3rem; }
+
+/* OCaml code blocks: a small OCaml logo in the top right corner, left of the
+   copy button (2rem wide, at the right edge) */
+.slidev-code-wrapper:has(> pre code:is(.language-ocaml, .language-ml))::after {
+  content: '';
+  position: absolute; top: .45rem; right: 2.1rem;
+  width: 1.1rem; height: 1.1rem;
+  background: url('/ocaml-icon.svg') center / contain no-repeat;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* Elpi code blocks: the ELPI wordmark in the same place, as tall as the
+   OCaml camel's letters, white on the dark code background, black in light
+   mode */
+.slidev-code-wrapper:has(> pre code.language-elpi)::after {
+  content: '';
+  position: absolute; top: .63rem; right: 2.1rem;
+  width: 2.2rem; height: .75rem;
+  background: url('/elpi-icon2-white.png') right center / contain no-repeat;
+  pointer-events: none;
+}
+html:not(.dark) .slidev-code-wrapper:has(> pre code.language-elpi)::after {
+  background-image: url('/elpi-icon2-black.png');
+}
+
+/* dark mode: titles (h1, h2) on a solid black box hugging the text, readable
+   over the textures; centered titles (their own style, or inside a
+   .text-center element) keep their box centered */
+html.dark .lw :is(h1, h2) {
+  width: fit-content;
+  background: var(--lw-bg);
+  padding: .05em .35em;
+  margin-left: -.35em;
+  border-radius: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+html.dark .lw :is(h1, h2):is([style*="text-align:center"], [style*="text-align: center"]),
+html.dark .lw .text-center :is(h1, h2) { margin-inline: auto; }
+
+/* pros and cons: markdown lists inside <div class="pros"> / <div class="cons">,
+   each item prefixed with a green + or a red −; the lists of a column share
+   their left edge, also in a centered column */
+.lw :is(.pros, .cons) { width: 70%; margin-inline: auto; text-align: left; }
+.lw :is(.pros, .cons) ul { list-style: none; margin: .4rem 0 0; padding: 0; }
+.lw :is(.pros, .cons) li { position: relative; padding-left: 2.1rem; margin-bottom: .35em; font-size: 1.7rem; font-weight: 600; line-height: 1.3; color: var(--lw-fg); }
+.lw :is(.pros, .cons) li::before {
+  position: absolute; left: 0; top: 0;
+  width: 1.5rem; text-align: center;
+  font-weight: 700; font-size: 1.9rem; line-height: 1.1;
+}
+.lw .pros li::before { content: '+'; color: #4ade80; }
+.lw .cons li::before { content: '−'; color: #f87171; }
+html:not(.dark) .lw .pros li::before { color: #16a34a; }
+html:not(.dark) .lw .cons li::before { color: #dc2626; }
+
+/* Rocq (Coq) code blocks: the Rocq bird, on a white tile so the dark purple
+   reads on the dark code background */
+.slidev-code-wrapper:has(> pre code:is(.language-coq, .language-rocq))::after {
+  content: '';
+  position: absolute; top: .45rem; right: 2.1rem;
+  width: 1.1rem; height: 1.1rem;
+  background: #fff url('/rocq-icon.svg') center / 80% no-repeat;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* regular text (paragraphs) on a solid box hugging the text, black in dark
+   mode and white in light mode, in full text color: readable over the
+   textures. Not for paragraphs made of pictures (avatars, logos), credits or
+   code output */
+.lw p:not(:has(> img)):not(.lw-credit p, .slidev-runner-output p, .authors p, .vauthors p, .vfamily p) {
+  width: fit-content;
+  color: var(--lw-fg);
+  background: var(--lw-bg);
+  padding: .1em .35em;
+  margin-left: -.35em;
+  border-radius: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.lw .text-center p:not(:has(> img)),
+.lw p:is([style*="text-align:center"], [style*="text-align: center"]) { margin-inline: auto; }
+/* the same for bullet lists: each item on its box (the yellow marker stays
+   outside); not for the pros/cons, summary and table of contents lists */
+.lw ul > li:not(.pros li, .cons li, .lw-summary li, .slidev-toc li) {
+  width: fit-content;
+  color: var(--lw-fg);
+  background: var(--lw-bg);
+  padding: .05em .35em;
+  border-radius: 2px;
+}
+/* soft edges for the text boxes above (titles, paragraphs, bullets): a
+   blurred halo of the same color instead of a sharp border */
+html.dark .lw :is(h1, h2),
+.lw p:not(:has(> img)):not(.lw-credit p, .slidev-runner-output p, .authors p, .vauthors p, .vfamily p),
+.lw ul > li:not(.pros li, .cons li, .lw-summary li, .slidev-toc li) {
+  border-radius: .4em;
+  box-shadow: 0 0 .5em .25em var(--lw-bg);
+}
+
+/* end slide: url under the QR code, event line with the conference logos */
+.lw .lw-end-url { font-family: 'Roboto Mono', monospace; font-size: 1rem; color: var(--lw-fg-muted); }
+.lw .lw-end-event { font-size: .95rem; color: var(--lw-fg-muted); display: flex; align-items: center; gap: .6rem; }
+.lw .lw-end-event img { filter: var(--lw-logo-filter); }

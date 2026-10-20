@@ -7,8 +7,9 @@
  * second with the error "no more steps".
  *
  * Usage in slides.md: an editable block, run on load and on every edit,
- * with the output below it: what the program printed, Success./Failure./Error.,
- * and the errors of the query and of the run. The errors and warnings
+ * with the output below it: what the program printed, Success./Failure./Error.
+ * (on success, with the values of the variables of the query and the
+ * constraints left), and the errors of the query and of the run. The errors and warnings
  * of the program are underlined in the code (setup/monaco.ts); a program with
  * errors runs without the rules that have errors, and a warning below the
  * code says so.
@@ -76,14 +77,22 @@ export default defineCodeRunnersSetup(() => {
         return [toHtml(e instanceof Error ? e.message : String(e), 'text-red-500'),
           { text: 'Error.', class: 'text-red-500' }]
       }
-      const { status, output, errors } = result
+      const { status, output, errors, assignments, constraints } = result
       // what the program printed, the result, then the errors (the last one
       // can be the warning that the program could not be fully compiled)
       const out = []
       if (output.trim() !== '')
         out.push(toHtml(output.trimEnd()))
-      if (status === 'success')
+      if (status === 'success') {
         out.push({ text: 'Success.', class: 'text-green-500' })
+        for (const [name, value] of Object.entries(assignments ?? {}))
+          out.push(toHtml(`${name} = ${value}`))
+        if (constraints && constraints.length > 0) {
+          out.push({ text: 'Constraints:', class: 'text-gray-400' })
+          for (const c of constraints)
+            out.push(toHtml(c))
+        }
+      }
       else if (status === 'failure')
         out.push({ text: 'Failure.', class: 'text-orange-500' })
       else

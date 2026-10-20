@@ -12,7 +12,8 @@
  * their own) is folded when the editor opens: the editor, the server and the
  * runner have the whole code, the slide shows the rest. The line of
  * % hidden: stays visible, with what follows the colon, e.g.
- * % hidden: the facts.
+ * % hidden: the facts. When exporting (PDF, PNG...) nothing is folded: the
+ * export shows the whole code.
  */
 
 import type { Diagnostic } from './elpi-lsp'
@@ -93,9 +94,14 @@ function setupElpi(monaco: Monaco) {
   // stays open
   const visibleLines = (editor: import('monaco-editor').editor.ICodeEditor) =>
     editor.getVisibleRanges().reduce((n, r) => n + r.endLineNumber - r.startLineNumber + 1, 0)
+  // exporting: `slidev export` loads the slides with ?print=..., the export
+  // page of the browser is the route /export (also #/export with hash routing)
+  const exporting = () =>
+    new URLSearchParams(location.search).has('print')
+    || /(^|\/)export\b/.test(location.pathname + location.hash)
   const foldOnOpen = (editor: import('monaco-editor').editor.ICodeEditor) => {
     const model = editor.getModel()
-    if (!model || model.getLanguageId() !== 'elpi' || !model.getLinesContent().some(l => begin.test(l)))
+    if (exporting() || !model || model.getLanguageId() !== 'elpi' || !model.getLinesContent().some(l => begin.test(l)))
       return
     let tries = 20
     const fold = () => {
