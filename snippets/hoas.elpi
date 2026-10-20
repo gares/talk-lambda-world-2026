@@ -1,0 +1,20 @@
+data tm.
+symb app : tm -> tm -> tm.
+symb lam : (tm -> tm) -> tm.
+
+main :- F = (x\x), F 1 = 1.
+main :- F = (x\x + 1), F 1 = 2. % its syntax
+main :- F = (x\x + 1), R is F 1, R = 2. % its syntax
+main :- Fst = (lam x\ lam y\ x), print Fst.
+
+symb c : tm. % dummy
+
+func depth tm -> int.
+depth (app H A) N :-
+  depth H N1, depth A N2, N is N1 + N2.
+depth (lam F) N :-
+  depth (F c) N1,
+  N is N1 + 1.
+depth c 0.
+
+main :- depth (lam x\ lam y\ app x y) N, print N.

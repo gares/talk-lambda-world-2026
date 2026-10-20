@@ -1,0 +1,26 @@
+data tm.
+symb app : tm -> tm -> tm.
+symb lam : (tm -> tm) -> tm.
+
+data ty.
+symb arr : ty -> ty -> ty.
+
+func of tm -> ty.
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-
+  pi x\ of x S ==> of (F x) T.
+of (uvar as E) T :-
+  suspend E T.
+
+constraint of {
+    rule (of X T1) \ (of X T2) <=>
+      (if (T1 = T2) true (print T1 "!=" T2, fail)).
+}
+
+main :- print "edit here".
+% hidden: examples
+main :- of (app D D) _.
+func suspend tm, ty.
+suspend X T :- declare_constraint (of X T) [X].
+% hidden-end
