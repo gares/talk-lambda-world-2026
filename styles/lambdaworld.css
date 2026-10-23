@@ -324,3 +324,7 @@ html.dark .lw :is(h1, h2),
 .lw .lw-end-url { font-family: 'Roboto Mono', monospace; font-size: 1rem; color: var(--lw-fg-muted); }
 .lw .lw-end-event { font-size: .95rem; color: var(--lw-fg-muted); display: flex; align-items: center; gap: .6rem; }
 .lw .lw-end-event img { filter: var(--lw-logo-filter); }
+
+/* highlighted code lines: the others are dimmed less than Slidev's default,
+   so that they stay readable */
+.lw .slidev-code .slidev-code-dishonored { opacity: .55; }

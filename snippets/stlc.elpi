@@ -20,7 +20,7 @@ of (lam F) (arr S T) :-
 namespace s1 {
 /*#region of1*/
 func of tm -> ty.
-of c S0.
+of c S0.        % assumed: pi x\ ... ==>
 of (app H A) T :-
   of H (arr S T), of A S.
 of (lam F) (arr S T) :-
@@ -31,8 +31,8 @@ namespace s2 {
 
 /*#region of2*/
 func of tm -> ty.
-of d S1.
-of c S0.
+of d S1.        % assumed: pi x\ ... ==>
+of c S0.        % assumed: pi x\ ... ==>
 of (app H A) T :-
   of H (arr S T), of A S.
 of (lam F) (arr S T) :-

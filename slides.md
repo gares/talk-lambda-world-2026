@@ -166,14 +166,134 @@ Simply typed $\lambda$-calculus in $\lambda$-tree syntax (HOAS)
 Typing
 
 
-````md magic-move
+````md magic-move {at:1}
+```elpi
+func of tm -> ty.
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-
+  pi x\ of x S ==>
+        of (F x) T.
+```
 
-<<< @/snippets/stlc.elpi#of elpi
-<<< @/snippets/stlc.elpi#of1 elpi
-<<< @/snippets/stlc.elpi#of2 elpi
-<<< @/snippets/stlc.elpi#of elpi
+```elpi {4}
+func of tm -> ty.
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-    % F = x\ lam y\ x
+  pi x\ of x S ==>
+        of (F x) T.
+```
 
+```elpi {2,5-6}
+func of tm -> ty.
+of c S0.        % assumed: pi x\ ... ==>
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-    % F = x\ lam y\ x
+  pi x\ of x S ==>
+        of (F x) T.
+```
 
+```elpi {5,7}
+func of tm -> ty.
+of c S0.        % assumed: pi x\ ... ==>
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-    % F = x\ lam y\ x
+  pi x\ of x S ==>
+        of (F x) T.
+```
+
+```elpi {5}
+func of tm -> ty.
+of c S0.        % assumed: pi x\ ... ==>
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-    % F = y\ c
+  pi x\ of x S ==>
+        of (F x) T.
+```
+
+```elpi {2,6-7}
+func of tm -> ty.
+of d S1.        % assumed: pi x\ ... ==>
+of c S0.        % assumed: pi x\ ... ==>
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-    % F = y\ c
+  pi x\ of x S ==>
+        of (F x) T.
+```
+
+```elpi {6,8}
+func of tm -> ty.
+of d S1.        % assumed: pi x\ ... ==>
+of c S0.        % assumed: pi x\ ... ==>
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-    % F = y\ c
+  pi x\ of x S ==>
+        of (F x) T.
+```
+
+```elpi {3}
+func of tm -> ty.
+of d S1.        % assumed: pi x\ ... ==>
+of c S0.        % assumed: pi x\ ... ==>   T1 = S0
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-
+  pi x\ of x S ==>
+        of (F x) T.
+```
+
+```elpi
+func of tm -> ty.
+of d S1.        % assumed: pi x\ ... ==>
+of c S0.        % assumed: pi x\ ... ==>
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-
+  pi x\ of x S ==>
+        of (F x) T.
+```
+
+```elpi
+func of tm -> ty.
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-
+  pi x\ of x S ==>
+        of (F x) T.
+```
+
+```elpi {2}
+func of tm -> ty.
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-
+  pi x\ of x S ==>
+        of (F x) T.
+```
+
+```elpi {2-3}
+func of tm -> ty.
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-
+  pi x\ of x S ==>
+        of (F x) T.
+```
+
+```elpi {none}
+func of tm -> ty.
+of (app H A) T :-
+  of H (arr S T), of A S.
+of (lam F) (arr S T) :-
+  pi x\ of x S ==>
+        of (F x) T.
+```
 ````
 
 <br/>
@@ -182,36 +302,150 @@ Typing
 
 ::right::
 
+<div class="h-36">
+
 ````md magic-move {at:1}
-
 ```elpi
-main :- of (lam x\ lam y\ x) TyFst.
+?- of (lam x\ lam y\ x) TyFst.
 ```
 
-```elpi
-main :- of (lam x\ lam y\ x) (arr S0 T0).
-main :- of        (lam y\ c) T0.
+```elpi {1}
+?- of (lam x\ lam y\ x) TyFst.
 ```
 
-```elpi
-main :- of (lam x\ lam y\ x) (arr S0 (arr S1 T1)).
-main :- of        (lam y\ c) (arr S1 T1).
-main :- of                c  T1.
+```elpi {1}
+?- of (lam x\ lam y\ x) TyFst.
 ```
 
-```elpi
-main :- of (lam x\ lam y\ x) TyFst.
-
-Success:
-  TyFst = arr S0 (arr S1 S0)
+```elpi {2}
+?- of (lam x\ lam y\ x) TyFst.
+?- of        (lam y\ c) T0.
 ```
 
-```elpi
-main :- of (app H A) T.
+```elpi {2}
+?- of (lam x\ lam y\ x) TyFst.
+?- of        (lam y\ c) T0.
+```
+
+```elpi {2}
+?- of (lam x\ lam y\ x) TyFst.
+?- of        (lam y\ c) T0.
+```
+
+```elpi {3}
+?- of (lam x\ lam y\ x) TyFst.
+?- of        (lam y\ c) T0.
+?- of                c  T1.
+```
+
+```elpi {3}
+?- of (lam x\ lam y\ x) TyFst.
+?- of        (lam y\ c) T0.
+?- of                c  T1.
+```
+
+```elpi {4}
+?- of (lam x\ lam y\ x) TyFst.
+?- of        (lam y\ c) T0.
+?- of                c  T1.
+   (no goals left)
+```
+
+```elpi {3}
+?- of (lam x\ lam y\ x) TyFst.
+
+Success: TyFst = arr S0 (arr S1 S0)
+```
+
+```elpi {1}
+?- of (app H A) T.
+```
+
+```elpi {2}
+?- of (app H A) T.
+?- of H (arr S T).
+```
+
+```elpi {2,4}
+?- of (app H A) T.
+?- of H (arr S T).
 
 Failure.
 ```
+````
 
+</div>
+
+````md magic-move {at:1}
+```elpi
+heap:
+```
+
+```elpi {2}
+heap:
+  TyFst ↦ arr S0 T0
+```
+
+```elpi
+heap:
+  TyFst ↦ arr S0 T0
+```
+
+```elpi
+heap:
+  TyFst ↦ arr S0 T0
+```
+
+```elpi {2-3}
+heap:
+  TyFst ↦ arr S0 (arr S1 T1)
+  T0    ↦ arr S1 T1
+```
+
+```elpi
+heap:
+  TyFst ↦ arr S0 (arr S1 T1)
+  T0    ↦ arr S1 T1
+```
+
+```elpi
+heap:
+  TyFst ↦ arr S0 (arr S1 T1)
+  T0    ↦ arr S1 T1
+```
+
+```elpi {2-4}
+heap:
+  TyFst ↦ arr S0 (arr S1 S0)
+  T0    ↦ arr S1 S0
+  T1    ↦ S0
+```
+
+```elpi
+heap:
+  TyFst ↦ arr S0 (arr S1 S0)
+  T0    ↦ arr S1 S0
+  T1    ↦ S0
+```
+
+```elpi
+heap:
+  TyFst ↦ arr S0 (arr S1 S0)
+  T0    ↦ arr S1 S0
+  T1    ↦ S0
+```
+
+```elpi
+heap:
+```
+
+```elpi
+heap:
+```
+
+```elpi
+heap:
+```
 ````
 
 ---
