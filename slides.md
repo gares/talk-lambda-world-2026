@@ -67,24 +67,6 @@ class: lw bg-grid lw-summary
 # Summary
 <Toc minDepth="1" maxDepth="2" />
 
-1. The Elpi programming language
-   - logic programming
-     - syntax, unif, rules; age two ways
-     - backtrack; older
-     - findall
-   - binders H.O.A.S. style
-     - F, beta, function space, HO unif
-     - lambda ADT
-   - Hello World: a type checker for $\lambda_\to$
-     - run, explain
-     - constraints, omega
-2. Interfacing Elpi with OCaml
-   - the `Conversion.t` data type
-   - the `ffi` GADT (better a builtin directly)
-   - autmatic glue code: `ppx_elpi`
-3. Again on ext lang
-   - user #1
-
 
 ---
 layout: lw-section
@@ -173,7 +155,7 @@ layout: two-cols-header
 level: 2
 ---
 
-# Elpi: Hello World!
+# The hello World!
 
 ::left::
 
@@ -236,6 +218,7 @@ Failure.
 layout: lw-default
 class: lw lw-run-side bg-strokes
 level: 2
+hideInToc: true
 ---
 
 # Elpi = <span class="normal-case">$\lambda$Prolog</span> + C..
@@ -257,7 +240,7 @@ level: 2
 ---
 layout: lw-default
 class: lw lw-run-side bg-strokes
-level: 2
+hideInToc: true
 ---
 
 # Spilling relations: Functional syntax
@@ -567,7 +550,7 @@ layout: lw-section
 
 ---
 layout: default
-level: 2
+hideInToc: true
 ---
 
 # take home
@@ -587,7 +570,7 @@ level: 2
 layout: two-cols-header
 image: logo.png
 backgroundSize: 80%
-level: 2
+hideInToc: true
 ---
 
 # Thanks for contributing code! {style="text-align:center"}

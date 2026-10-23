@@ -214,10 +214,10 @@ html:not(.dark) .lw-logo { filter: invert(1); }
 .lw.lw-summary .slidev-toc a { color: inherit; border-bottom: 0; }
 /* <Toc/> lists every section: more compact than a hand-written summary */
 .lw.lw-summary .slidev-toc > ol { margin-top: 1rem; }
-.lw.lw-summary .slidev-toc ol > li { margin-bottom: .7rem; font-size: 1.5rem; padding-left: 4.5rem; }
+.lw.lw-summary .slidev-toc ol > li { margin-bottom: 1rem; font-size: 1.5rem; padding-left: 4.5rem; }
 .lw.lw-summary .slidev-toc ol > li::before { font-size: 2.2rem; top: -.2em; }
-.lw.lw-summary .slidev-toc ol ol { margin-top: .2rem; }
-.lw.lw-summary .slidev-toc ol ol > li { margin-bottom: 0; font-size: 1rem; padding-left: .3rem; }
+.lw.lw-summary .slidev-toc ol ol { margin-top: .4rem; }
+.lw.lw-summary .slidev-toc ol ol > li { margin-bottom: .3rem; font-size: 1rem; padding-left: .3rem; }
 
 /* OCaml code blocks: a small OCaml logo in the top right corner, left of the
    copy button (2rem wide, at the right edge) */
