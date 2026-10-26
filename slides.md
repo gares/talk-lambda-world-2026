@@ -96,7 +96,7 @@ timeline:
       - { name: David H. D. Warren, img: /history/warren.jpg }
   - year: 1986
     short: λProlog
-    what: higher-order Logic Programming
+    what: higher-order logic programming
     people:
       - { name: Dale Miller, img: /history/miller.jpg }
       - { name: Gopalan Nadathur, img: /history/nadathur.jpg }
@@ -117,7 +117,7 @@ timeline:
 
 <Timeline :items="$frontmatter.timeline" />
 
-<div class="lw-credit">Photos: Robinson by D. Monniaux (CC BY-SA 3.0), Colmerauer by Alaindavid2 (CC BY-SA 4.0), Kowalski by Yongyuth (CC BY 3.0), Wikimedia Commons; Warren: academia.edu; Miller: researchr.org; Nadathur: his homepage -- Discalimer: This history is very partial; moreover all these guys are much smarter than me and Elpi would not even exist without their work.</div>
+<div class="lw-credit">Photos: Robinson by D. Monniaux (CC BY-SA 3.0), Colmerauer by Alaindavid2 (CC BY-SA 4.0), Kowalski by Yongyuth (CC BY 3.0), Wikimedia Commons; Warren: academia.edu; Miller: researchr.org; Nadathur: his homepage -- Disclaimer: This history is very partial; moreover all these people are much smarter than me and Elpi would not even exist without their work.</div>
 
 ---
 layout: lw-default
@@ -598,7 +598,7 @@ layout: lw-default
 level: 2
 ---
 
-# There and Back again
+# There and Back Again
 
 ```ocaml {1-2,6-9}
 module Conversion : sig
@@ -657,7 +657,7 @@ layout: two-cols-header
 level: 2
 ---
 
-# autmatic glue code: ppx_elpi
+# automatic glue code: ppx_elpi
 
 ::left::
 
@@ -780,7 +780,7 @@ li { margin-bottom: .1em; }
 ## APIs
 
 - 91 data types
-- 272 builtin 
+- 272 builtins
 
 ## Quotations
 
@@ -826,7 +826,7 @@ hideInToc: true
 <br/>
 
 ## Extension languages
-  - Use a language (ony) when it is a good fit
+  - Use a language (only) when it is a good fit
   - Niche language? Not a problem in 2026
   
 ## Elpi is a good fit for
@@ -910,7 +910,7 @@ hideInToc: true
 
 <div style="text-align:justify">
 
-Pedro Abreu, Yves Bertot, Frederic Besson, Rob Blanco, Simon Boulier, Luc Chabassier, Cyril Cohen, Enzo Crance, Maxime Dénès, Jim Fehrle, Davide Fissore, Paolo G. Giarrusso, Gaëtan Gilbert, Benjamin Gregoire, Hugo Herbelin, Yoichi Hirai, Jasper Hugunin, Emilio Jesus Gallego Arias, Jan-Oliver Kaiser, Philip Kaludercic, Chantal Keller, Vincent Laporte, Jean-Christophe Léchenet, Rodolphe Lepigre, Karl Palmskog, Pierre-Marie Pédrot, Ramkumar Ramachandra, Pierre Roux, Pierre Roux, Claudio Sacerdoti Coen, Kazuhiko Sakaguchi, Matthieu Sozeau, Gordon Stewart, David Swasey, Alexey Trilis, Quentin Vermande, Théo Zimmermann, wdewe, whonore 
+Pedro Abreu, Yves Bertot, Frederic Besson, Rob Blanco, Simon Boulier, Luc Chabassier, Cyril Cohen, Enzo Crance, Maxime Dénès, Jim Fehrle, Davide Fissore, Paolo G. Giarrusso, Gaëtan Gilbert, Benjamin Gregoire, Hugo Herbelin, Yoichi Hirai, Jasper Hugunin, Emilio Jesus Gallego Arias, Jan-Oliver Kaiser, Philip Kaludercic, Chantal Keller, Vincent Laporte, Jean-Christophe Léchenet, Rodolphe Lepigre, Karl Palmskog, Pierre-Marie Pédrot, Ramkumar Ramachandra, Pierre Roux, Claudio Sacerdoti Coen, Kazuhiko Sakaguchi, Matthieu Sozeau, Gordon Stewart, David Swasey, Alexey Trilis, Quentin Vermande, Théo Zimmermann, wdewe, whonore 
 
 </div>
 
