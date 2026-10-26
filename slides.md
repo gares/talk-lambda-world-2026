@@ -155,7 +155,7 @@ layout: two-cols-header
 level: 2
 ---
 
-# The hello World!
+# A simple type checker
 
 ::left::
 
@@ -475,6 +475,7 @@ level: 2
 layout: lw-default
 class: lw lw-run-side bg-strokes
 hideInToc: true
+hide: true
 ---
 
 # Spilling relations: Functional syntax
@@ -507,8 +508,15 @@ main :-
 ```
 
 ---
+layout: lw-section
+---
+
+# One language to rule them all
+
+---
 layout: lw-default
-level: 1
+level: 2
+hideInToc: true
 ---
 
 # One language to rule them all?
@@ -695,6 +703,7 @@ symb lam : string -> ty -> (term -> term) -> term.  % Lam
 ---
 layout: two-cols-header
 level: 2
+hide: true
 ---
 
 # Quotations
@@ -741,7 +750,7 @@ layout: two-cols-header
 level: 1
 ---
 
-# The integration in Rocq
+# Integration in the Rocq Prover
 
 [Rocq]{.chip} programs, specs and proofs in one language: written in [OCaml]{.chip} extended in [Elpi]{.chip}
 
