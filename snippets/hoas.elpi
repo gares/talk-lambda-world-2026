@@ -13,10 +13,10 @@ symb c : tm. % dummy
 
 func depth tm -> int.
 depth (app H A) N :-
-  depth H N1, depth A N2, N is N1 + N2.
+  depth H N1, depth A N2, N is 1 + max N1 N2.
 depth (lam F) N :-
   depth (F c) N1,
-  N is N1 + 1.
+  N is 1 + N1.
 depth c 0.
 
 % hidden: examples

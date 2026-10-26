@@ -13,11 +13,11 @@ of (lam F) (arr S T) :-
 of (uvar as E) T :-
   suspend E T.
 
-main :- print "edit here".
+main :-
+  T = app H A,
+  of T Ty,
+  print T ":" Ty.
 % hidden: examples
-main :- of (app H A) T.
-main :- of (app H A) T, H = (lam x\ x).
-main :- of (app (lam x\ x) A) T.
 main :- of (app D D) T.
 func suspend tm, ty.
 suspend X T :- declare_constraint (of X T) [X].

@@ -600,7 +600,7 @@ level: 2
 
 # There and Back again
 
-```ocaml
+```ocaml {1-2,6-9}
 module Conversion : sig
   type 'a t = {
     ty : ty_ast;
@@ -649,10 +649,7 @@ let builtin =
 ```
 
 ```elpi {monaco-run}
-main :- sys.readdir "." L ok, print L.
-% hidden: examples
-%main :- sys.readdir "/foo" L (error E), print L E.
-% hidden-end
+main :- sys.readdir "." L D, print D "L =" L.
 ```
 
 ---
@@ -674,7 +671,7 @@ type tctx = CtxEntry of (string[@elpi.key "term"]) * ty
 
 type term =
   | Var of { name : string } [@elpi.var tctx]
-  | App of { fun_ : term; arg : term }
+  | App of { head : term; arg : term }
   | Lam of { name : string;
              ty : ty;
              body : (term[@elpi.binder "term" tctx
@@ -746,8 +743,26 @@ The term F is: lam int x\ lam int y\ x
 ```
 
 ---
-layout: two-cols-header
+layout: lw-section
 level: 1
+---
+
+# Integration in the Rocq Prover
+
+<div class="flex items-center justify-center gap-8 mt-6 logo-equation">
+  <img src="/rocq-logo.svg" alt="Rocq" class="on-white h-20" style="padding: 1rem 1.2rem" />
+  <span>+</span>
+  <img src="/elpi-icon2-black.png" alt="Elpi" class="on-white h-20" style="padding: 1.3rem 1.2rem" />
+  <span>=</span>
+  <img src="/rocq-elpi-logo.png" alt="Rocq-Elpi" class="on-white h-40" />
+</div>
+
+<div class="lw-credit">Rocq-Elpi logo by Reynald Affeldt</div>
+
+---
+layout: two-cols-header
+level: 2
+hideInToc: true
 ---
 
 # Integration in the Rocq Prover
@@ -761,6 +776,23 @@ li { margin-bottom: .1em; }
 </style>
 
 ::left::
+
+## APIs
+
+- 91 data types
+- 272 builtin 
+
+## Quotations
+
+```elpi
+main :-
+  F = {{ fun (x : int) (y : lp:T) => x }},
+  %     .... rocq ......... elpi  .......
+  T = {{ int }},
+  print "The term F is:" F.
+```
+
+::right::
 
 ## Derive
 
@@ -777,13 +809,6 @@ Check set_tag_twice:
     set tag x (set tag y r) = set tag x r.
 ```
 
-::right::
-
-<br/>
-
-<img src="/rocq-elpi-logo.png" alt="Rocq-Elpi logo" class="on-white h-56 mt-6 mx-auto block" />
-
-<div class="lw-credit">Rocq-Elpi logo by Reynald Affeldt</div>
 
 ---
 layout: lw-section
@@ -805,7 +830,7 @@ hideInToc: true
   - Niche language? Not a problem in 2026
   
 ## Elpi is a good fit for
-  - Syntax with binders
+  - Syntax with binders & holes
   - OCaml ecosystem
 
 

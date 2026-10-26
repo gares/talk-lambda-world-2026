@@ -328,3 +328,9 @@ html.dark .lw :is(h1, h2),
 /* highlighted code lines: the others are dimmed less than Slidev's default,
    so that they stay readable */
 .lw .slidev-code .slidev-code-dishonored { opacity: .55; }
+
+/* "logo + logo = logo": big yellow operators */
+.lw .logo-equation > span {
+  font-family: var(--lw-display); font-size: 3.5rem; line-height: 1;
+  color: var(--lw-yellow); -webkit-text-stroke: 1px var(--lw-title-stroke); paint-order: stroke fill;
+}

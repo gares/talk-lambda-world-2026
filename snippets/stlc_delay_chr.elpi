@@ -18,9 +18,8 @@ constraint of {
       (if (T1 = T2) true (print T1 "!=" T2, fail)).
 }
 
-main :- print "edit here".
-% hidden: examples
 main :- of (app D D) _.
+% hidden: examples
 func suspend tm, ty.
 suspend X T :- declare_constraint (of X T) [X].
 % hidden-end
