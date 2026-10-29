@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Syntax trees with binders made easy: the Elpi programming language - Slidev</title>
+<link rel="preload" as="image" href="/talk-lambda-world-2026/inria.svg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/One_Ring_Blender_Render.png">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/One_Ring_Blender_Render2.png">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/ocaml-logo.svg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/elpi-icon2-black.png">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/rocq-logo.svg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/rocq-elpi-logo.png">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/logo.png">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/Armael.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/artagnon.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/bgregoir.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/Blaisorblade.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/cdunchev.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/CohenCyril.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/dwarfmaster.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/ecranceMERCE.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/ejgallego.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/eponier.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/FissoreD.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/gares.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/gdufrc.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/herbelin.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/jfehrle.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/jwintz.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/kit-ty-kate.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/lthls.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/lukovdm.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/maximedenes.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/mb64.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/MSoegtropIMC.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/palmskog.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/pedrotst.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/phikal.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/pi8027.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/ppedrot.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/proux01.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/rgrinberg.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/rlepigre.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/robblanco.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/sacerdot.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/shonfeder.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/SimonBoulier.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/SkySkimmer.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/smuenzel.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/Tragicus.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/vbgl.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/VojtechStep.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/voodoos.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/wdeweijer.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/whonore.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/XVilka.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/ybertot.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/yoichi-at-bedrock.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/avatars/Zimmi48.jpg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/qr-elpi.svg">
+<link rel="preload" as="image" href="/talk-lambda-world-2026/lw/logos-3.png">
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/slidevjs/slidev/assets/favicon.png">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta property="slidev:version" content="53.0.0">
+<meta name="description" content="&quot;## Slidev Starter Template\nPresentation slides for developers.\n\nLearn more at [Sli.dev](https://sli.dev)\n&quot;">
+<meta property="og:title" content="Syntax trees with binders made easy: the Elpi programming language - Slidev">
+<meta property="og:description" content="&quot;## Slidev Starter Template\nPresentation slides for developers.\n\nLearn more at [Sli.dev](https://sli.dev)\n&quot;">  <script type="module" crossorigin src="/talk-lambda-world-2026/assets/index-C0eXo8hW.js"></script>
+  <link rel="modulepreload" crossorigin href="/talk-lambda-world-2026/assets/rolldown-runtime-Dd_uD5pT.js">
+  <link rel="modulepreload" crossorigin href="/talk-lambda-world-2026/assets/modules/shiki-CkAukp76.js">
+  <link rel="modulepreload" crossorigin href="/talk-lambda-world-2026/assets/modules/vue-BR4-AGVj.js">
+  <link rel="modulepreload" crossorigin href="/talk-lambda-world-2026/assets/monaco/bundled-types-D1-zmo-G.js">
+  <link rel="modulepreload" crossorigin href="/talk-lambda-world-2026/assets/_plugin-vue_export-helper-BDNMzG2s.js">
+  <link rel="stylesheet" crossorigin href="/talk-lambda-world-2026/assets/modules/shiki-V4-KMA-J.css">
+  <link rel="stylesheet" crossorigin href="/talk-lambda-world-2026/assets/monaco/bundled-types-D_E-rEO-.css">
+  <link rel="stylesheet" crossorigin href="/talk-lambda-world-2026/assets/index-BgUudlom.css">
+</head>
+<body>
+  <div id="app"></div>
+  <div id="mermaid-rendering-container"></div>
+  
+</body>
+</html>

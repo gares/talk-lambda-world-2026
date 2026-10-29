@@ -1,0 +1,1 @@
+var e=`/talk-lambda-world-2026/One_Ring_Blender_Render.png`;export{e as t};

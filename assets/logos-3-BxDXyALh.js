@@ -1,0 +1,1 @@
+var e=`/talk-lambda-world-2026/inria.svg`,t=`/talk-lambda-world-2026/lw/logos-3.png`;export{e as n,t};

@@ -1,0 +1,1 @@
+var e=`/talk-lambda-world-2026/elpi-icon2-black.png`;export{e as t};
